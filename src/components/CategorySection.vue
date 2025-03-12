@@ -16,7 +16,13 @@
         </q-card-section>
         <q-separator />
         <q-card-actions align="right">
-          <q-btn flat label="Voir le livre" color="black" class="hover-pop" />
+          <q-btn
+            flat
+            label="Voir le livre"
+            color="black"
+            class="hover-pop"
+            to="/apercu"
+          />
         </q-card-actions>
       </q-card>
     </div>
@@ -61,6 +67,7 @@ defineProps({
   border-radius: 10px 10px 0 0;
   height: 200px;
   object-fit: cover;
+  margin-bottom: 20px; /* Ajoute de l'espace entre les lignes */
 }
 
 /* Bouton au survol */
