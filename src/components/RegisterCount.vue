@@ -3,9 +3,7 @@
     <q-card class="q-pa-md q-card-shadow animated-card">
       <!-- Titre -->
       <q-card-section>
-        <div class="text-h4 text-center text-primary q-mb-sm">
-          Créez un compte
-        </div>
+        <div class="text-h4 text-center text-primary q-mb-sm">Créez un compte</div>
         <div class="text-subtitle1 text-center text-grey-7">
           Inscrivez-vous pour commencer à écrire
         </div>
@@ -57,9 +55,8 @@
       <!-- Conditions d'utilisation -->
       <q-card-section class="text-center text-grey-7">
         <div class="text-caption">
-          Cliquez sur « S’inscrire » pour accepter les conditions d’utilisation
-          de Fumbo et reconnaître que la politique de confidentialité de Medium
-          s’applique à vous.
+          Cliquez sur « S’inscrire » pour accepter les conditions d’utilisation de Fumbo et
+          reconnaître que la politique de confidentialité de Medium s’applique à vous.
         </div>
       </q-card-section>
     </q-card>
@@ -67,41 +64,40 @@
 </template>
 
 <script>
-import { ref } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter } from 'vue-router'
 
 export default {
-  name: "RegisterPage",
+  name: 'RegisterPage',
   setup() {
-    const router = useRouter();
+    const router = useRouter()
 
     const signUpWithGoogle = () => {
-      alert("Inscription avec Google en cours...");
+      alert('Inscription avec Google en cours...')
       // Implémentation avec Firebase ou OAuth
-    };
+    }
 
     const signUpWithFacebook = () => {
-      alert("Inscription avec Facebook en cours...");
+      alert('Inscription avec Facebook en cours...')
       // Implémentation avec Firebase ou OAuth
-    };
+    }
 
     const signUpWithGmail = () => {
-      alert("Inscription avec Gmail en cours...");
+      alert('Inscription avec Gmail en cours...')
       // Implémentation avec Firebase ou OAuth
-    };
+    }
 
     const redirectToLogin = () => {
-      router.push("/connection");
-    };
+      router.push('/connection')
+    }
 
     return {
       signUpWithGoogle,
       signUpWithFacebook,
       signUpWithGmail,
       redirectToLogin,
-    };
+    }
   },
-};
+}
 </script>
 
 <style scoped>
@@ -120,7 +116,9 @@ export default {
   border-radius: 16px;
   background-color: #ffffff;
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
-  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  transition:
+    transform 0.3s ease-in-out,
+    box-shadow 0.3s ease-in-out;
 }
 
 /* Animation au survol */

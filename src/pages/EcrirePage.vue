@@ -2,9 +2,7 @@
   <div class="story-editor">
     <nav class="navbar">
       <div class="navbar-left">
-        <button class="options-button" @click="toggleOptions">
-          ☰ Détails de l'histoire
-        </button>
+        <button class="options-button" @click="toggleOptions">☰ Détails de l'histoire</button>
       </div>
       <div class="navbar-right">
         <!-- Boutons d'actions -->
@@ -35,9 +33,7 @@
                 <q-item-section avatar>
                   <q-icon name="logout" />
                 </q-item-section>
-                <q-item-section class="text-negative"
-                  >Déconnexion</q-item-section
-                >
+                <q-item-section class="text-negative">Déconnexion</q-item-section>
               </q-item>
             </q-list>
           </q-menu>
@@ -68,11 +64,7 @@
       <div class="options-panel" :class="{ 'options-panel-open': showOptions }">
         <div class="form-group">
           <label for="title">Titre</label>
-          <input
-            id="title"
-            v-model="storyDetails.title"
-            placeholder="Titre de l'histoire"
-          />
+          <input id="title" v-model="storyDetails.title" placeholder="Titre de l'histoire" />
         </div>
         <div class="form-group">
           <label for="description">Description</label>
@@ -98,17 +90,12 @@
             placeholder="Catégorie de l'histoire"
           />
         </div>
-        <button class="save-details-button" @click="saveDetails">
-          Enregistrer détails
-        </button>
+        <button class="save-details-button" @click="saveDetails">Enregistrer détails</button>
       </div>
 
       <div class="editor-content">
         <h1 class="title">Raconter votre histoire...</h1>
-        <textarea
-          v-model="story"
-          placeholder="Commencer à racoter une histoire ..."
-        ></textarea>
+        <textarea v-model="story" placeholder="Commencer à racoter une histoire ..."></textarea>
       </div>
     </div>
   </div>
@@ -118,66 +105,65 @@
 export default {
   data() {
     return {
-      story: "",
+      story: '',
       showOptions: true,
       storyDetails: {
-        title: "",
-        description: "",
-        mainCharacters: "",
-        category: "",
+        title: '',
+        description: '',
+        mainCharacters: '',
+        category: '',
       },
-    };
+    }
   },
   created() {
-    this.loadStoryFromLocalStorage();
+    this.loadStoryFromLocalStorage()
   },
   methods: {
     toggleOptions() {
-      this.showOptions = !this.showOptions;
+      this.showOptions = !this.showOptions
     },
     saveDetails() {
-      console.log("Story details saved:", this.storyDetails);
-      this.saveStoryToLocalStorage();
+      console.log('Story details saved:', this.storyDetails)
+      this.saveStoryToLocalStorage()
     },
     publishStory() {
-      console.log("Story published:", this.story);
+      console.log('Story published:', this.story)
     },
-    exportToPDF() {
-      // Générer un PDF avec jsPDF
-      const doc = new jsPDF();
-      doc.text(this.storyDetails.title, 10, 10);
-      doc.text(this.storyDetails.description, 10, 20);
-      doc.text(this.story, 10, 40);
-      doc.save("story.pdf");
-    },
-    generateShareLink() {
-      const shareData = {
-        title: this.storyDetails.title,
-        description: this.storyDetails.description,
-        story: this.story,
-      };
-      const encodedData = encodeURIComponent(JSON.stringify(shareData));
-      const shareUrl = `${window.location.origin}/shared-story?data=${encodedData}`;
-      navigator.clipboard.writeText(shareUrl);
-      alert("Lien de partage copié !");
-    },
-    saveStoryToLocalStorage() {
-      const storyData = {
-        story: this.story,
-        details: this.storyDetails,
-      };
-      localStorage.setItem("savedStory", JSON.stringify(storyData));
-    },
-    loadStoryFromLocalStorage() {
-      const savedStory = localStorage.getItem("savedStory");
-      if (savedStory) {
-        const parsedData = JSON.parse(savedStory);
-        this.story = parsedData.story;
-        this.storyDetails = parsedData.details;
-      }
-    },
+    //exportToPDF() {
+    // Générer un PDF avec jsPDF
+    //const doc = new jsPDF();
+    //doc.text(this.storyDetails.title, 10, 10);
+    //doc.text(this.storyDetails.description, 10, 20);
+    //doc.text(this.story, 10, 40);
+    //doc.save("story.pdf");
+  }, //
+  generateShareLink() {
+    const shareData = {
+      title: this.storyDetails.title,
+      description: this.storyDetails.description,
+      story: this.story,
+    }
+    const encodedData = encodeURIComponent(JSON.stringify(shareData))
+    const shareUrl = `${window.location.origin}/shared-story?data=${encodedData}`
+    navigator.clipboard.writeText(shareUrl)
+    alert('Lien de partage copié !')
   },
-};
+  saveStoryToLocalStorage() {
+    const storyData = {
+      story: this.story,
+      details: this.storyDetails,
+    }
+    localStorage.setItem('savedStory', JSON.stringify(storyData))
+  },
+  loadStoryFromLocalStorage() {
+    const savedStory = localStorage.getItem('savedStory')
+    if (savedStory) {
+      const parsedData = JSON.parse(savedStory)
+      this.story = parsedData.story
+      this.storyDetails = parsedData.details
+    }
+  },
+}
 </script>
 
 <style scoped>
