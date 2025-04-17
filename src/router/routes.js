@@ -25,6 +25,7 @@ const routes = [
         path: '/Enregistrer',
         component: () => import('src/pages/InscriptionPage.vue'),
       },
+     
       {
         path: '/about',
         component: () => import('src/pages/AboutPage.vue'),

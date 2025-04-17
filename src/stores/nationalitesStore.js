@@ -11,43 +11,44 @@ export const useNationalitesStore = defineStore('nationalites', {
   }),
   actions: {
     async fetchNationalites() {
-      this.isLoading = true
+      this.isLoading = true;
+      this.error = null;
+
       try {
         const response = await axios.get(
-          'http://localhost:81/bibliotheque_api/routes/api.php/nationalites',
-        )
+          'http://localhost/Api_bibliotheque/nationalite/select/?user=herva&mdp=mdp'
+        );
 
-        // Log de la réponse brute pour vérification
-        console.log("Réponse brute de l'API:", response.data)
+        console.log("Structure complète de la réponse:", response.data);
 
-        // Vérifiez si la réponse contient un message et un tableau de nationalités
-        const message = response.data.match(/"message":"(.*?)"/)
-        const nationalites = response.data.match(/\[.*?\]/) // Extraction de la partie du tableau
+        const nationalites = response.data.me;
 
-        if (message) {
-          this.message = message[1] // Si le message est trouvé, on l'assigne
-        }
-
-        if (nationalites) {
-          // Maintenant on peut parser les nationalités
-          const parsedNationalites = JSON.parse(nationalites[0])
-          if (Array.isArray(parsedNationalites)) {
-            this.nationalites = parsedNationalites // Si la réponse est un tableau, on le stocke
-          } else {
-            console.error("La réponse n'est pas un tableau valide.")
-            this.nationalites = []
-          }
+        if (Array.isArray(nationalites)) {
+          this.nationalites = nationalites.map(nationalite => ({
+            ...nationalite,
+            image: `http://localhost/Api_bibliotheque/${nationalite.image}`
+          }));
         } else {
-          console.error('Aucune nationalité trouvée dans la réponse.')
-          this.nationalites = []
+          console.error("La réponse n'est pas un tableau valide.");
+          this.nationalites = [];
         }
+
+        console.log("Nationalités stockées :", this.nationalites);
       } catch (err) {
-        this.error = err.message
-        console.error('Erreur lors de la récupération des nationalités:', err)
+        if (err.response) {
+          this.error = err.response.data.message || "Erreur côté serveur.";
+          console.error("Erreur API :", err.response.data);
+        } else if (err.request) {
+          this.error = "Le serveur ne répond pas.";
+          console.error("Pas de réponse du serveur :", err.request);
+        } else {
+          this.error = err.message || "Une erreur inconnue est survenue.";
+          console.error("Erreur :", err);
+        }
       } finally {
-        this.isLoading = false
+        this.isLoading = false;
       }
-    },
+    }
   },
   getters: {
     getNationalites: (state) => state.nationalites,

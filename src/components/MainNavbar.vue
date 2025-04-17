@@ -1,6 +1,6 @@
 <template>
-  <!-- HEADER -->
-  <q-header elevated class="bg-white text-black shadow-sm">
+  <!-- Afficher la navbar uniquement si la route n'est pas /inscription -->
+  <q-header v-if="!isInscriptionPage" elevated class="bg-white text-black shadow-sm">
     <q-toolbar>
       <!-- Titre -->
       <q-toolbar-title class="text-weight-bold text-h5"> Fumbo </q-toolbar-title>
@@ -37,23 +37,28 @@
           rounded
           unelevated
           color="black"
-          label="S'inscrire"
+          label="Se Connecter"
           class="q-ml-md text-white hover-grow"
-          to="/Enregistrer"
+          to="/connection"
         />
       </div>
     </q-toolbar>
   </q-header>
 
   <!-- Séparateur -->
-  <q-separator spaced />
+  <q-separator v-if="!isInscriptionPage" spaced />
 </template>
 
 <script setup>
 import { ref } from 'vue'
+import { useRoute } from 'vue-router'
 import LangSwitcher from 'src/components/LangSwitcher.vue'
 
 const searchQuery = ref('')
+
+// Détecter la route actuelle
+const route = useRoute()
+const isInscriptionPage = route.path === '/Enregistrer' // Vérifie si la route est /inscription
 </script>
 
 <style scoped>

@@ -1,21 +1,31 @@
 <template>
   <q-page class="register-page flex flex-center">
     <q-card class="q-pa-md q-card-shadow animated-card">
+      <!-- Affichage du message de succès en haut -->
+      <q-card v-if="successMessage" flat bordered class="q-mb-md text-center success-card">
+        <q-card-section>
+          <q-icon name="thumb_up" size="50px" color="green" />
+          <div class="text-h6 text-positive q-mt-sm">Votre compte a été créé avec succès !</div>
+          <div class="text-caption q-mt-sm">Veuillez patienter pendant 15 secondes...</div>
+          <q-spinner-dots size="40px" color="primary" class="q-mt-md" />
+        </q-card-section>
+      </q-card>
+
+      <!-- Titre -->
       <q-card-section>
-        <div class="text-h4 text-center text-primary q-mb-sm">
-          Créez un compte
-        </div>
+        <div class="text-h4 text-center text-primary q-mb-sm">Créez un compte</div>
       </q-card-section>
 
       <!-- Formulaire d'inscription -->
       <q-card-section>
-        <q-form @submit="register">
+        <q-form @submit="register" ref="formRef">
           <q-input
-            v-model="form.nom"
+            v-model="form.username"
             label="Nom"
             outlined
             dense
             class="q-mb-md"
+            
           />
           <q-input
             v-model="form.prenom"
@@ -23,6 +33,7 @@
             outlined
             dense
             class="q-mb-md"
+       
           />
           <q-input
             v-model="form.email"
@@ -31,24 +42,43 @@
             outlined
             dense
             class="q-mb-md"
+            :rules="[validateEmail]"
           />
           <q-input
             v-model="form.password"
             label="Mot de passe"
-            type="password"
+            :type="showPassword ? 'text' : 'password'"
             outlined
             dense
             class="q-mb-md"
-          />
+            :rules="[validatePassword]"
+          >
+            <template v-slot:append>
+              <q-icon
+                :name="showPassword ? 'visibility_off' : 'visibility'"
+                class="cursor-pointer"
+                @click="togglePasswordVisibility"
+              />
+            </template>
+          </q-input>
           <q-input
-            v-model="form.biographie"
+            v-model="form.bio"
             label="Biographie"
             outlined
             dense
             class="q-mb-md"
           />
+          <q-uploader
+            v-model="form.image"
+            label="Télécharger une image"
+            outlined
+            dense
+            class="q-mb-md"
+            accept="image/*"
+            @added="onImageAdded"
+          />
           <q-select
-            v-model="form.nationalite"
+            v-model="form.id_nationalite"
             label="Nationalité"
             outlined
             dense
@@ -62,8 +92,9 @@
               <q-item v-bind="scope.itemProps">
                 <q-item-section avatar>
                   <q-img
-                    :src="scope.opt.image"
+                    :src="getFullImageUrl(scope.opt.image)"
                     style="width: 24px; height: 16px"
+                    alt="Image de la nationalité"
                   />
                 </q-item-section>
                 <q-item-section>
@@ -72,7 +103,6 @@
               </q-item>
             </template>
           </q-select>
-
           <q-btn
             label="S'inscrire"
             type="submit"
@@ -82,69 +112,143 @@
             :loading="isLoading"
           />
         </q-form>
-        
-        <!-- Affichage des messages d'erreur ou de succès -->
+
+        <!-- Affichage des messages d'erreur -->
         <div v-if="error" class="text-negative q-mt-md">{{ error }}</div>
-        <div v-if="successMessage" class="text-positive q-mt-md">{{ successMessage }}</div>
       </q-card-section>
     </q-card>
   </q-page>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-import { useInscriptionStore } from '../stores/inscriptionStore.js';
-import { useNationalitesStore } from '../stores/nationalitesStore.js';
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useInscriptionStore } from '../stores/inscriptionStore.js'
+import { useNationalitesStore } from '../stores/nationalitesStore.js'
 
 // Initialisation du store
-const inscriptionStore = useInscriptionStore();
-const nationalitesStore = useNationalitesStore();
+const inscriptionStore = useInscriptionStore()
+const nationalitesStore = useNationalitesStore()
+const router = useRouter()
+
+// Fonction pour compléter l'URL de l'image
+const getFullImageUrl = (imagePath) => {
+  const baseUrl = 'http://localhost/Api_bibliotheque' // Remplacez par votre domaine
+  return imagePath.startsWith('http') ? imagePath : `${baseUrl}${imagePath}`
+}
 
 // Formulaire réactif
 const form = ref({
-  nom: '',
+  username: '',
   prenom: '',
   email: '',
   password: '',
-  biographie: '',
-  nationalite: null,
-});
+  bio: '',
+  image: null,
+  id_nationalite: null,
+})
+
+// Référence pour le formulaire
+const formRef = ref(null)
+
+// Gestion de la visibilité du mot de passe
+const showPassword = ref(false)
+const togglePasswordVisibility = () => {
+  showPassword.value = !showPassword.value
+}
+
+// Validation de l'email
+const validateEmail = (val) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return emailRegex.test(val) || 'Veuillez entrer une adresse e-mail valide avec un arobase (@).'
+}
+
+// Validation du mot de passe
+const validatePassword = (val) => {
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>])[A-Za-z\d!@#$%^&*(),.?":{}|<>]{8,}$/
+  return (
+    passwordRegex.test(val) ||
+    'Le mot de passe doit contenir au moins 8 caractères, une lettre majuscule, une lettre minuscule, un chiffre et un symbole.'
+  )
+}
+
+// Méthode pour gérer l'ajout de l'image
+const onImageAdded = (files) => {
+  if (files.length > 0) {
+    form.value.image = files[0] // Stocke le fichier sélectionné
+    console.log('Image ajoutée :', files[0])
+  }
+}
 
 // Chargement des nationalités au montage du composant
 onMounted(() => {
-  nationalitesStore.fetchNationalites();
-});
+  nationalitesStore.fetchNationalites()
+  resetMessages() // Réinitialise les messages d'erreur et de succès
+})
 
 // Computed properties pour les nationalités et les états de chargement
-const nationalites = computed(() => nationalitesStore.getNationalites);
-const isLoading = computed(() => inscriptionStore.getIsLoading);
-const error = computed(() => inscriptionStore.getError);
-const successMessage = computed(() => inscriptionStore.getSuccessMessage);
+const nationalites = computed(() => nationalitesStore.getNationalites)
+const isLoading = computed(() => inscriptionStore.getIsLoading)
+const error = computed(() => inscriptionStore.getError)
+const successMessage = computed(() => inscriptionStore.getSuccessMessage)
 
 // Méthodes
-const register = () => {
-  // Envoi des données du formulaire au store pour inscription
-  inscriptionStore.registerUser(form.value);
-};
+const register = async () => {
+  console.log('Valeur de nationalité avant envoi :', form.value.id_nationalite)
+  if (!form.value.id_nationalite) {
+    console.error('Aucune nationalité sélectionnée !')
+    return
+  }
+
+  await inscriptionStore.registerUser(form.value)
+
+  if (!inscriptionStore.getError) {
+    // Nettoyer les champs après l'enregistrement
+    form.value = {
+      username: '',
+      prenom: '',
+      email: '',
+      password: '',
+      bio: '',
+      image: null,
+      id_nationalite: null,
+    }
+
+    // Réinitialiser les validations du formulaire
+    formRef.value.resetValidation()
+
+    // Redirection après 15 secondes
+    setTimeout(() => {
+      router.push('/connection')
+    }, 15000)
+  }
+}
+
+// Réinitialise les messages d'erreur et de succès
+const resetMessages = () => {
+  inscriptionStore.error = null
+  inscriptionStore.successMessage = null
+}
 </script>
 
 <style scoped>
 /* Style général */
 .register-page {
-  background: linear-gradient(135deg, #2575fc, #cbcbcb);
   height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 20px;
 }
 
 /* Style de la carte */
 .q-card-shadow {
-  width: 400px;
+  width: 450px;
   border-radius: 16px;
   background-color: #ffffff;
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
   transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  padding: 20px;
 }
 
 /* Animation au survol */
@@ -156,5 +260,31 @@ const register = () => {
 /* Bouton pleine largeur */
 .full-width {
   width: 100%;
+}
+
+/* Style des messages d'erreur et de succès */
+.text-negative {
+  color: #e53935;
+  font-weight: bold;
+  text-align: center;
+}
+
+.text-positive {
+  color: #43a047;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* Style de la carte de succès */
+.success-card {
+  border: 1px solid #43a047;
+  background-color: #e8f5e9;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+/* Icône de visibilité */
+.cursor-pointer {
+  cursor: pointer;
 }
 </style>
