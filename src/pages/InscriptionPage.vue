@@ -25,7 +25,7 @@
             outlined
             dense
             class="q-mb-md"
-            
+            :rules="[(val) => !!val || 'Le nom est requis']"
           />
           <q-input
             v-model="form.prenom"
@@ -33,7 +33,7 @@
             outlined
             dense
             class="q-mb-md"
-       
+            :rules="[(val) => !!val || 'Le prénom est requis']"
           />
           <q-input
             v-model="form.email"
@@ -93,7 +93,7 @@
                 <q-item-section avatar>
                   <q-img
                     :src="getFullImageUrl(scope.opt.image)"
-                    style="width: 24px; height: 16px"
+                    style="width: 24px; height: 16px; border-radius: 50px;"
                     alt="Image de la nationalité"
                   />
                 </q-item-section>
@@ -133,7 +133,7 @@ const router = useRouter()
 
 // Fonction pour compléter l'URL de l'image
 const getFullImageUrl = (imagePath) => {
-  const baseUrl = 'http://localhost/Api_bibliotheque' // Remplacez par votre domaine
+  const baseUrl = 'http://localhost/Api_bibliotheque/uploads/nationalites/' // Remplacez par votre domaine
   return imagePath.startsWith('http') ? imagePath : `${baseUrl}${imagePath}`
 }
 
