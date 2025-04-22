@@ -9,13 +9,25 @@ const routes = [
         component: () => import('src/components/RegisterCount.vue'),
       },
       {
+        path: '/login',
+        component: () => import('src/components/RegisterCount.vue'),
+      },
+      {
         path: '/ouvrage',
         component: () => import('pages/HistoirePage.vue'),
       },
-      { path: '/histoire', component: () => import('pages/HistoirePage.vue') },
+      { path: '/create-book', component: () => import('src/dashboard/CreateBook.vue') },
+      { path: '/my-books', component: () => import('pages/HistoirePage.vue') },
+      { path: '/share-books', component: () => import('src/dashboard/ShareBook.vue') },
       {
         path: '/publier',
         component: () => import('src/pages/OuvragePage.vue'),
+      },
+      {
+        path: '/ecrire',
+        name: 'DashBoard',
+        component: () => import('src/dashboard/DashBoard.vue'),
+        meta: { requiresAut: true },
       },
       {
         path: '/connection',
@@ -25,7 +37,6 @@ const routes = [
         path: '/Enregistrer',
         component: () => import('src/pages/InscriptionPage.vue'),
       },
-     
       {
         path: '/about',
         component: () => import('src/pages/AboutPage.vue'),
