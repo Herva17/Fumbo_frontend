@@ -1,163 +1,156 @@
 <template>
   <q-page class="dashboard-page">
-    <!-- Section "Lives gratuits" et autres onglets -->
-    <div class="row q-mb-md items-center justify-between">
-      <!-- Partie gauche - Onglets de navigation -->
-      <div class="col">
-        <q-tabs
-          v-model="tab"
-          inline-label
-          class="text-grey-8"
-          active-color="primary"
-          indicator-color="primary"
-          align="left"
+    <q-header elevated class="bg-white text-black shadow-sm">
+      <!-- Section "Lives gratuits" et autres onglets -->
+      <q-toolbar>
+        <q-toolbar-title class="text-weight-bold text-h5">Fumbo</q-toolbar-title>
+        <q-space />
+
+        <!-- Champ de recherche -->
+        <q-input
+          dense
+          filled
+          rounded
+          placeholder="Rechercher..."
+          class="q-mr-md animate__animated animate__fadeInRight"
+          v-model="searchQuery"
         >
-          <q-tab name="trending" icon="trending_up" label="Histoires tendance" />
-          <q-tab name="free" icon="live_tv" label="Lives gratuits" />
-          <q-tab name="write" icon="edit" label="Écrire" />
-          <q-tab name="community" icon="groups" label="Communauté" />
-          <q-tab name="contests" icon="emoji_events" label="Concours d'écriture" />
-          <!-- Sélecteur de langue -->
-          <!-- <LangSwitcher class="q-ml-md" /> -->
-        </q-tabs>
-      </div>
+          <template v-slot:append>
+            <q-icon name="search" />
+          </template>
+        </q-input>
 
-      <!-- Partie droite - Actions utilisateur -->
-      <div class="col-auto row items-center q-gutter-sm">
-        <!-- Sélecteur de langue -->
-        <LangSwitcher class="q-ml-md" />
-        <!-- Bouton Notifications -->
-        <q-btn flat round icon="notifications" class="notif">
-          <q-badge floating color="red">3</q-badge>
+        <!-- Liens de navigation -->
+        <div class="flex items-center gap-4">
+          <q-btn flat label="Livres gratuit" class="hover-underline-animation" to="/ouvrage" />
+          <q-btn flat label="Ecrire" class="hover-underline-animation" to="/ouvrage" />
+          <q-btn flat label="Publier" class="hover-underline-animation" to="/create-book" />
+          <q-btn flat label="Raconter" class="hover-underline-animation" to="/Ecrire" />
+          <q-btn flat label="Ecouter" class="hover-underline-animation" to="/ecouter" />
 
-          <q-menu anchor="bottom right" self="top right">
-            <q-card style="width: 400px; max-width: 100vw">
-              <q-tabs
-                v-model="notifTab"
-                dense
-                class="text-grey-8"
-                active-color="primary"
-                indicator-color="primary"
-              >
-                <q-tab name="story" label="Histoire" />
-                <q-tab name="community" label="Communauté" />
-                <q-tab name="system" label="Système" />
-              </q-tabs>
+          <!-- Partie droite - Actions utilisateur -->
+          <div class="col-auto row items-center q-gutter-sm">
+            <!-- Sélecteur de langue -->
+            <LangSwitcher class="q-ml-md" />
+            <q-space ref="30px" />
+            <!-- Bouton Notifications -->
+            <q-btn flat round icon="notifications" class="notif">
+              <q-badge floating color="red">3</q-badge>
 
-              <q-separator />
+              <q-menu anchor="bottom right" self="top right">
+                <q-card style="width: 400px; max-width: 100vw">
+                  <q-tabs
+                    v-model="notifTab"
+                    dense
+                    class="text-grey-8"
+                    active-color="primary"
+                    indicator-color="primary"
+                  >
+                    <q-tab name="story" label="Histoire" />
+                    <q-tab name="community" label="Communauté" />
+                    <q-tab name="system" label="Système" />
+                  </q-tabs>
 
-              <q-tab-panels v-model="notifTab" animated>
-                <!-- Onglet Histoire -->
-                <q-tab-panel name="story">
-                  <div class="q-pa-sm">
-                    <div class="text-subtitle2 q-mb-sm">
-                      A Cure For Ice <span class="text-caption">par fuel line</span>
-                    </div>
-                    <div class="text-caption q-mb-sm">✧ ✧ ✧ ✧ ✧ ✧</div>
-                    <div class="q-mb-sm">
-                      <strong>Véronique:</strong> Super histoire, on attend la suite avec
-                      impatience, merci !!! 😊
-                    </div>
-                    <div class="text-caption text-primary">Live la critique complète</div>
+                  <q-separator />
+
+                  <q-tab-panels v-model="notifTab" animated>
+                    <!-- Onglet Histoire -->
+                    <q-tab-panel name="story">
+                      <div class="q-pa-sm">
+                        <div class="text-subtitle2 q-mb-sm">
+                          A Cure For Ice <span class="text-caption">par fuel line</span>
+                        </div>
+                        <div class="text-caption q-mb-sm">✧ ✧ ✧ ✧ ✧ ✧</div>
+                        <div class="q-mb-sm">
+                          <strong>Véronique:</strong> Super histoire, on attend la suite avec
+                          impatience, merci !!! 😊
+                        </div>
+                        <div class="text-caption text-primary">Live la critique complète</div>
+                      </div>
+
+                      <q-separator spaced />
+
+                      <div class="q-pa-sm">
+                        <div class="text-subtitle2 q-mb-sm">
+                          Au Clair de Lune, Tome 1 : La Lune Vengeresse
+                        </div>
+                        <div class="text-caption">par Laura B</div>
+                      </div>
+                    </q-tab-panel>
+
+                    <!-- Onglet Communauté -->
+                    <q-tab-panel name="community">
+                      <div class="q-pa-sm text-center text-grey-6">
+                        Aucune notification communautaire
+                      </div>
+                    </q-tab-panel>
+
+                    <!-- Onglet Système -->
+                    <q-tab-panel name="system">
+                      <div class="q-pa-sm text-center text-grey-6">Aucune notification système</div>
+                    </q-tab-panel>
+                  </q-tab-panels>
+
+                  <q-separator />
+
+                  <div class="row justify-center q-pa-sm">
+                    <q-btn flat label="Afficher toutes les notifications" color="primary" dense />
                   </div>
+                </q-card>
+              </q-menu>
+            </q-btn>
 
-                  <q-separator spaced />
+            <!-- Menu Profil -->
+            <q-btn flat round icon="account_circle" class="text-black">
+              <q-menu>
+                <q-list style="min-width: 100px">
+                  <q-item>
+                    <q-avatar size="30px" class="q-mr-md">
+                      <q-img src="~assets/user-avatar.png" />
+                    </q-avatar>
+                    <q-item-section>
+                      <q-item-label class="text-h8">Thierry Nirere</q-item-label>
+                      <q-item-label caption>utilisateur</q-item-label>
+                    </q-item-section>
+                  </q-item>
 
-                  <div class="q-pa-sm">
-                    <div class="text-subtitle2 q-mb-sm">
-                      Au Clair de Lune, Tome 1 : La Lune Vengeresse
-                    </div>
-                    <div class="text-caption">par Laura B</div>
-                  </div>
-                </q-tab-panel>
+                  <q-separator />
 
-                <!-- Onglet Communauté -->
-                <q-tab-panel name="community">
-                  <div class="q-pa-sm text-center text-grey-6">
-                    Aucune notification communautaire
-                  </div>
-                </q-tab-panel>
+                  <q-item clickable v-ripple to="/profil">
+                    <q-item-section avatar>
+                      <q-icon name="person" />
+                    </q-item-section>
+                    <q-item-section>Profil</q-item-section>
+                  </q-item>
 
-                <!-- Onglet Système -->
-                <q-tab-panel name="system">
-                  <div class="q-pa-sm text-center text-grey-6">Aucune notification système</div>
-                </q-tab-panel>
-              </q-tab-panels>
+                  <q-separator />
+                  <q-item clickable v-ripple to="/parametre">
+                    <q-item-section avatar>
+                      <q-icon name="settings" />
+                    </q-item-section>
+                    <q-item-section>Paramètre</q-item-section>
+                  </q-item>
 
-              <q-separator />
+                  <q-separator />
 
-              <div class="row justify-center q-pa-sm">
-                <q-btn flat label="Afficher toutes les notifications" color="primary" dense />
-              </div>
-            </q-card>
-          </q-menu>
-        </q-btn>
+                  <q-item clickable v-ripple @click="logout">
+                    <q-item-section avatar>
+                      <q-icon name="logout" />
+                    </q-item-section>
 
-        <!-- Menu Profil -->
-        <q-btn flat round icon="account_circle" class="text-black">
-          <q-menu>
-            <q-list style="min-width: 100px">
-              <q-item>
-                <q-avatar size="30px" class="q-mr-md">
-                  <q-img src="~assets/user-avatar.png" />
-                </q-avatar>
-                <q-item-section>
-                  <q-item-label class="text-h8">Thierry Nirere</q-item-label>
-                  <q-item-label caption>utilisateur</q-item-label>
-                </q-item-section>
-              </q-item>
-
-              <q-separator />
-
-              <q-item clickable v-ripple to="/profil">
-                <q-item-section avatar>
-                  <q-icon name="person" />
-                </q-item-section>
-                <q-item-section>Profil</q-item-section>
-              </q-item>
-
-              <q-separator />
-              <q-item clickable v-ripple to="/parametre">
-                <q-item-section avatar>
-                  <q-icon name="settings" />
-                </q-item-section>
-                <q-item-section>Paramètre</q-item-section>
-              </q-item>
-
-              <q-separator />
-
-              <q-item clickable v-ripple @click="logout">
-                <q-item-section avatar>
-                  <q-icon name="logout" />
-                </q-item-section>
-
-                <q-item-section class="text-negative">Déconnexion</q-item-section>
-              </q-item>
-            </q-list>
-          </q-menu>
-        </q-btn>
-
-        <!-- Bouton Plus -->
-        <q-btn flat round icon="more_vert"> </q-btn>
-        <q-menu>
-          <q-list style="min-width: 100px">
-            <q-item clickable v-ripple to="/module">
-              <q-item-section>Comment ça marche</q-item-section>
-            </q-item>
-            <q-separator />
-            <q-item clickable v-ripple to="/support">
-              <q-item-section>Support</q-item-section>
-            </q-item>
-            <q-separator />
-            <q-item clickable v-ripple to="/condition">
-              <q-item-section>Conditions générales</q-item-section>
-            </q-item>
-
-            <q-separator />
-          </q-list>
-        </q-menu>
-      </div>
-    </div>
+                    <q-item-section class="text-negative">Déconnexion</q-item-section>
+                  </q-item>
+                </q-list>
+              </q-menu>
+            </q-btn>
+          </div>
+        </div>
+        <q-separator spaced />
+      </q-toolbar>
+    </q-header>
+    <q-separator />
+    <BannerSection class="banner" />
+    <q-separator />
 
     <!-- Filtres -->
     <div class="row q-mb-lg">
@@ -285,9 +278,9 @@
 
 <script setup>
 import { ref } from 'vue'
-// import LangSwitcher from 'src/components/LangSwitcher.vue'
+import BannerSection from 'src/components/BannerSection.vue'
+import LangSwitcher from 'src/components/LangSwitcher.vue'
 
-const tab = ref('trending')
 const filter = ref('Tous')
 const sort = ref('recent')
 
@@ -296,9 +289,18 @@ const filterOptions = ['Tous', 'Fantasy', 'Aventure', 'Romance', 'Drame', 'Horre
 
 <style scoped>
 .dashboard-page {
-  padding: 20px;
-  max-width: 1200px;
+  padding: 0px;
+  padding-left: 5px;
+  padding-right: 5px;
+  max-width: 1500px;
   margin: 0 auto;
+}
+/* Animation de soulignement au survol */
+.hover-underline-animation {
+  position: relative;
+}
+.banner {
+  max-width: 1800px;
 }
 
 .story-card {

@@ -16,8 +16,16 @@ const routes = [
         path: '/ouvrage',
         component: () => import('pages/HistoirePage.vue'),
       },
+      {
+        path: '/raconter',
+        component: () => import('pages/HistoirePage.vue'),
+      },
+      {
+        path: '/ecouter',
+        component: () => import('src/pages/LecteurPage.vue'),
+      },
       { path: '/create-book', component: () => import('src/dashboard/CreateBook.vue') },
-      { path: '/my-books', component: () => import('pages/HistoirePage.vue') },
+      { path: '/apercu', component: () => import('src/Details/ApercuBook.vue') },
       { path: '/share-books', component: () => import('src/dashboard/ShareBook.vue') },
       {
         path: '/publier',
@@ -25,7 +33,7 @@ const routes = [
       },
       {
         path: '/ecrire',
-        name: 'DashBoard',
+
         component: () => import('src/dashboard/DashBoard.vue'),
         meta: { requiresAut: true },
       },
