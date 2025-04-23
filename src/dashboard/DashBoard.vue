@@ -106,11 +106,11 @@
                 <q-list style="min-width: 100px">
                   <q-item>
                     <q-avatar size="30px" class="q-mr-md">
-                      <q-img src="~assets/user-avatar.png" />
+                      <q-img :src="user.image || '~assets/user-avatar.png'" />
                     </q-avatar>
                     <q-item-section>
-                      <q-item-label class="text-h8">Thierry Nirere</q-item-label>
-                      <q-item-label caption>utilisateur</q-item-label>
+                      <q-item-label class="text-h8">{{ user.username }} {{ user.prenom }} </q-item-label>
+                      <q-item-label caption>{{ user.bio || 'Biographie non disponible' }}</q-item-label>
                     </q-item-section>
                   </q-item>
 
@@ -277,7 +277,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue';
 import BannerSection from 'src/components/BannerSection.vue'
 import LangSwitcher from 'src/components/LangSwitcher.vue'
 
@@ -285,6 +285,24 @@ const filter = ref('Tous')
 const sort = ref('recent')
 
 const filterOptions = ['Tous', 'Fantasy', 'Aventure', 'Romance', 'Drame', 'Horreur', 'Mystère']
+const user = ref({
+  username: '',
+  prenom: '',
+  image: '',
+  bio: '',
+});
+
+onMounted(() => {
+  const storedUser = localStorage.getItem('user');
+  if (storedUser) {
+    user.value = JSON.parse(storedUser); // Récupère les informations de l'utilisateur depuis le localStorage
+  }
+});
+
+const logout = () => {
+  localStorage.removeItem('user'); // Supprime les informations de l'utilisateur du localStorage
+  window.location.reload(); // Recharge la page pour réinitialiser l'état
+};
 </script>
 
 <style scoped>

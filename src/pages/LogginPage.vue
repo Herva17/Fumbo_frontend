@@ -130,33 +130,44 @@
 <script setup>
 import { useLoginStore } from '../stores/login'
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 const loginStore = useLoginStore();
+const router = useRouter(); // Utilisation du router pour la redirection
 
 const isEmailLoginModalOpen = ref(false); // Variable pour contrôler l'état du modal
 
 const openEmailLoginModal = () => {
-  console.log('Bouton cliqué, ouverture du modal');
   isEmailLoginModalOpen.value = true; // Ouvre le modal
 };
 
 const closeEmailLoginModal = () => {
-  console.log('Fermeture du modal');
   isEmailLoginModalOpen.value = false; // Ferme le modal
 };
 
 const handleLogin = async () => {
   await loginStore.loginUser();
   if (!loginStore.error) {
-    console.log('Connexion réussie !');
+    // Stocker les informations de l'utilisateur dans le localStorage
+    const userData = {
+      username: loginStore.user.username, // Nom de l'utilisateur
+      prenom: loginStore.user.prenom, // Nom de l'utilisateur
+      image: loginStore.user.image, // Image de l'utilisateur
+      bio: loginStore.user.bio, // Biographie de l'utilisateur
+      email: loginStore.user.email, // Email de l'utilisateur
+      nationalite: loginStore.user.nationalite, // Nationalité de l'utilisateur
+    };
+    localStorage.setItem('user', JSON.stringify(userData));
+
     closeEmailLoginModal(); // Ferme le modal après une connexion réussie
+    router.push('/ecrire'); // Redirige vers la route "/ecrire"
   } else {
     console.error('Erreur de connexion :', loginStore.error);
   }
 };
 
 const redirectToSignup = () => {
-  console.log('Redirection vers la page d\'inscription');
+  router.push('/Enregistrer'); // Redirige vers la page d'inscription
 };
 
 // Assurez-vous que les méthodes signInWithGoogle et signInWithPhone sont définies si elles sont utilisées
