@@ -18,7 +18,7 @@ const routes = [
       },
       {
         path: '/raconter',
-        component: () => import('pages/HistoirePage.vue'),
+        component: () => import('src/components/SaveStory.vue'),
       },
       {
         path: '/ecouter',
@@ -40,6 +40,10 @@ const routes = [
       {
         path: '/connection',
         component: () => import('pages/LogginPage.vue'),
+      },
+      {
+        path: '/write',
+        component: () => import('pages/EcrirePage.vue'),
       },
       {
         path: '/Enregistrer',
