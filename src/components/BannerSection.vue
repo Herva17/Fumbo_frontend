@@ -1,6 +1,6 @@
 <template>
   <div class="banner-container">
-    <q-img src="/img/book3.jpg" class="banner-image">
+    <q-img src="/img/hero-about.jpg" class="banner-image">
       <div class="banner-overlay">
         <div class="text-h4 text-white text-center text-weight-bold">Bienvenue sur Fumbo</div>
         <div class="text-subtitle1 text-white text-center q-mt-md">
