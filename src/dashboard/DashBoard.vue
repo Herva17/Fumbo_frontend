@@ -5,7 +5,6 @@
       <q-toolbar>
         <q-toolbar-title class="text-weight-bold text-h5">Fumbo</q-toolbar-title>
         <q-space />
-
         <!-- Champ de recherche -->
         <q-input
           dense
@@ -23,9 +22,9 @@
         <!-- Liens de navigation -->
         <div class="flex items-center gap-4">
           <q-btn flat label="Livres gratuit" class="hover-underline-animation" to="/ouvrage" />
-          <q-btn flat label="Ecrire" class="hover-underline-animation" to="/ouvrage" />
+          <q-btn flat label="Ecrire" class="hover-underline-animation" to="/write" />
           <q-btn flat label="Publier" class="hover-underline-animation" to="/create-book" />
-          <q-btn flat label="Raconter" class="hover-underline-animation" to="/Ecrire" />
+          <q-btn flat label="Raconter" class="hover-underline-animation" to="/raconter" />
           <q-btn flat label="Ecouter" class="hover-underline-animation" to="/ecouter" />
 
           <!-- Partie droite - Actions utilisateur -->
@@ -109,8 +108,12 @@
                       <q-img :src="user.image || '~assets/user-avatar.png'" />
                     </q-avatar>
                     <q-item-section>
-                      <q-item-label class="text-h8">{{ user.username }} {{ user.prenom }} </q-item-label>
-                      <q-item-label caption>{{ user.bio || 'Biographie non disponible' }}</q-item-label>
+                      <q-item-label class="text-h8"
+                        >{{ user.username }} {{ user.prenom }}
+                      </q-item-label>
+                      <q-item-label caption>{{
+                        user.bio || 'Biographie non disponible'
+                      }}</q-item-label>
                     </q-item-section>
                   </q-item>
 
@@ -277,7 +280,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted } from 'vue'
 import BannerSection from 'src/components/BannerSection.vue'
 import LangSwitcher from 'src/components/LangSwitcher.vue'
 
@@ -290,19 +293,19 @@ const user = ref({
   prenom: '',
   image: '',
   bio: '',
-});
+})
 
 onMounted(() => {
-  const storedUser = localStorage.getItem('user');
+  const storedUser = localStorage.getItem('user')
   if (storedUser) {
-    user.value = JSON.parse(storedUser); // Récupère les informations de l'utilisateur depuis le localStorage
+    user.value = JSON.parse(storedUser) // Récupère les informations de l'utilisateur depuis le localStorage
   }
-});
+})
 
 const logout = () => {
-  localStorage.removeItem('user'); // Supprime les informations de l'utilisateur du localStorage
-  window.location.reload(); // Recharge la page pour réinitialiser l'état
-};
+  localStorage.removeItem('user') // Supprime les informations de l'utilisateur du localStorage
+  window.location.reload() // Recharge la page pour réinitialiser l'état
+}
 </script>
 
 <style scoped>

@@ -17,6 +17,9 @@
     <StorySection />
     <q-separator spaced />
 
+    <RacontePage />
+    <q-separator spaced />
+
     <TestimonialSection />
     <q-separator spaced />
 
@@ -29,6 +32,7 @@ import Navbar from 'src/components/MainNavbar.vue'
 import BannerSection from 'src/components/BannerSection.vue'
 import CarouselSection from 'src/components/CarouselSection.vue'
 import StorySection from 'src/components/StorySection.vue'
+import RacontePage from 'src/components/RacontePage.vue'
 import TestimonialSection from 'src/components/TestimonialSection.vue'
 import InfoSection from 'src/components/InfoSection.vue'
 </script>

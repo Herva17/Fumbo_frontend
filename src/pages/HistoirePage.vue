@@ -1,223 +1,356 @@
 <template>
   <q-layout view="hHh lpR fFf">
-    <!-- HEADER -->
     <q-header elevated class="bg-white text-black shadow-sm">
-      <!-- Section "Lives gratuits" et autres onglets -->
       <q-toolbar>
-        <q-toolbar-title class="text-weight-bold text-h5">Fumbo</q-toolbar-title>
+        <q-toolbar-title class="text-weight-bold text-h5 text-primary">
+          <q-icon name="menu_book" class="q-mr-sm" />
+          Fumbo
+        </q-toolbar-title>
+
         <q-space />
 
-        <!-- Champ de recherche -->
+        <!-- Barre de recherche utilisant performSearch -->
         <q-input
-          dense
-          filled
-          rounded
-          placeholder="Rechercher..."
-          class="q-mr-md animate__animated animate__fadeInRight"
           v-model="searchQuery"
+          placeholder="Rechercher..."
+          dense
+          @keyup.enter="performSearch"
         >
           <template v-slot:append>
-            <q-icon name="search" />
+            <q-icon name="search" @click="performSearch" />
           </template>
         </q-input>
 
-        <!-- Liens de navigation -->
         <div class="flex items-center gap-4">
-          <q-btn flat label="Livres gratuit" class="hover-underline-animation" to="/ouvrage" />
-          <q-btn flat label="Ecrire" class="hover-underline-animation" to="/ouvrage" />
-          <q-btn flat label="Publier" class="hover-underline-animation" to="/create-books" />
-          <q-btn flat label="Raconter" class="hover-underline-animation" to="/Ecrire" />
-          <q-btn flat label="Ecouter" class="hover-underline-animation" to="/ecouter" />
+          <q-btn flat label="Livres gratuits" class="hover-underline-animation" to="/ouvrage" />
+          <q-btn flat label="Ecrire" class="hover-underline-animation" to="/ecrire" />
 
-          <!-- Partie droite - Actions utilisateur -->
-          <div class="col-auto row items-center q-gutter-sm">
-            <!-- Sélecteur de langue -->
-            <LangSwitcher class="q-ml-md" />
-            <q-space ref="30px" />
-            <!-- Bouton Notifications -->
-            <q-btn flat round icon="notifications" class="notif">
-              <q-badge floating color="red">3</q-badge>
-
-              <q-menu anchor="bottom right" self="top right">
-                <q-card style="width: 400px; max-width: 100vw">
-                  <q-tabs
-                    v-model="notifTab"
-                    dense
-                    class="text-grey-8"
-                    active-color="primary"
-                    indicator-color="primary"
-                  >
-                    <q-tab name="story" label="Histoire" />
-                    <q-tab name="community" label="Communauté" />
-                    <q-tab name="system" label="Système" />
-                  </q-tabs>
-
-                  <q-separator />
-
-                  <q-tab-panels v-model="notifTab" animated>
-                    <!-- Onglet Histoire -->
-                    <q-tab-panel name="story">
-                      <div class="q-pa-sm">
-                        <div class="text-subtitle2 q-mb-sm">
-                          A Cure For Ice <span class="text-caption">par fuel line</span>
-                        </div>
-                        <div class="text-caption q-mb-sm">✧ ✧ ✧ ✧ ✧ ✧</div>
-                        <div class="q-mb-sm">
-                          <strong>Véronique:</strong> Super histoire, on attend la suite avec
-                          impatience, merci !!! 😊
-                        </div>
-                        <div class="text-caption text-primary">Live la critique complète</div>
-                      </div>
-
-                      <q-separator spaced />
-
-                      <div class="q-pa-sm">
-                        <div class="text-subtitle2 q-mb-sm">
-                          Au Clair de Lune, Tome 1 : La Lune Vengeresse
-                        </div>
-                        <div class="text-caption">par Laura B</div>
-                      </div>
-                    </q-tab-panel>
-
-                    <!-- Onglet Communauté -->
-                    <q-tab-panel name="community">
-                      <div class="q-pa-sm text-center text-grey-6">
-                        Aucune notification communautaire
-                      </div>
-                    </q-tab-panel>
-
-                    <!-- Onglet Système -->
-                    <q-tab-panel name="system">
-                      <div class="q-pa-sm text-center text-grey-6">Aucune notification système</div>
-                    </q-tab-panel>
-                  </q-tab-panels>
-
-                  <q-separator />
-
-                  <div class="row justify-center q-pa-sm">
-                    <q-btn flat label="Afficher toutes les notifications" color="primary" dense />
-                  </div>
-                </q-card>
-              </q-menu>
-            </q-btn>
-
-            <!-- Menu Profil -->
-            <q-btn flat round icon="account_circle" class="text-black">
-              <q-menu>
-                <q-list style="min-width: 100px">
-                  <q-item>
-                    <q-avatar size="30px" class="q-mr-md">
-                      <q-img src="~assets/user-avatar.png" />
-                    </q-avatar>
-                    <q-item-section>
-                      <q-item-label class="text-h8">Thierry Nirere</q-item-label>
-                      <q-item-label caption>utilisateur</q-item-label>
-                    </q-item-section>
-                  </q-item>
-
-                  <q-separator />
-
-                  <q-item clickable v-ripple to="/profil">
-                    <q-item-section avatar>
-                      <q-icon name="person" />
-                    </q-item-section>
-                    <q-item-section>Profil</q-item-section>
-                  </q-item>
-
-                  <q-separator />
-                  <q-item clickable v-ripple to="/parametre">
-                    <q-item-section avatar>
-                      <q-icon name="settings" />
-                    </q-item-section>
-                    <q-item-section>Paramètre</q-item-section>
-                  </q-item>
-
-                  <q-separator />
-
-                  <q-item clickable v-ripple @click="logout">
-                    <q-item-section avatar>
-                      <q-icon name="logout" />
-                    </q-item-section>
-
-                    <q-item-section class="text-negative">Déconnexion</q-item-section>
-                  </q-item>
-                </q-list>
-              </q-menu>
-            </q-btn>
-          </div>
+          <ProfileMenu
+            :user="currentUser"
+            :stats="userStats"
+            @show-premium="showPremiumOffer = true"
+          />
         </div>
-        <q-separator spaced />
       </q-toolbar>
     </q-header>
 
-    <q-separator spaced />
+    <q-page-container>
+      <div class="q-pa-md">
+        <!-- Section Catégories/Genres -->
+        <section class="q-mb-xl">
+          <h2 class="text-h5 q-mb-md">Genres</h2>
+          <div class="row q-col-gutter-md">
+            <div
+              v-for="genre in genres"
+              :key="genre.name"
+              class="col-xs-6 col-sm-4 col-md-3 col-lg-2"
+            >
+              <q-card flat class="genre-card cursor-pointer" @click="filterByGenre(genre.name)">
+                <q-img
+                  :src="`/img/genres/${genre.image}`"
+                  :alt="genre.name"
+                  ratio="1"
+                  class="rounded-borders"
+                >
+                  <div class="absolute-full flex flex-center">
+                    <div class="genre-label text-white text-subtitle1 text-weight-bold text-center">
+                      {{ genre.name }}
+                    </div>
+                  </div>
+                </q-img>
+              </q-card>
+            </div>
+          </div>
+        </section>
 
-    <!-- SECTIONS PAR CATÉGORIE -->
-    <div class="q-pa-md">
-      <CategorySection title="Histoires d'amour" :books="loveStories" />
-      <q-separator class="q-my-md" />
-      <CategorySection title="Romans policiers" :books="detectiveNovels" />
-      <q-separator class="q-my-md" />
-      <CategorySection title="Science-fiction" :books="scifiBooks" />
-    </div>
+        <!-- Section Fanfictions -->
+        <section class="q-mb-xl">
+          <h2 class="text-h5 q-mb-md">Fanfiction</h2>
+          <div class="row q-col-gutter-md">
+            <div
+              v-for="fandom in fandoms"
+              :key="fandom.name"
+              class="col-xs-6 col-sm-4 col-md-3 col-lg-2"
+            >
+              <q-card flat class="fandom-card cursor-pointer" @click="filterByFandom(fandom.name)">
+                <q-img
+                  :src="`/img/fandoms/${fandom.image}`"
+                  :alt="fandom.name"
+                  ratio="1"
+                  class="rounded-borders"
+                >
+                  <div class="absolute-full flex flex-center">
+                    <div
+                      class="fandom-label text-white text-subtitle1 text-weight-bold text-center"
+                    >
+                      {{ fandom.name }}
+                    </div>
+                  </div>
+                </q-img>
+              </q-card>
+            </div>
+          </div>
+          <q-btn
+            flat
+            label="Plus de fanfictions →"
+            color="primary"
+            class="q-mt-sm"
+            to="/fanfictions"
+          />
+        </section>
+
+        <!-- Section Thèmes Tendance -->
+
+        <section class="q-mb-xl">
+          <h2 class="text-h5 q-mb-md">Thèmes Tendance</h2>
+          <div class="q-gutter-sm">
+            <q-chip v-for="tag in trendingTags" :key="tag" clickable @click="filterByTag(tag)">
+              {{ tag }}
+            </q-chip>
+          </div>
+        </section>
+
+        <!-- Section Livres -->
+        <section>
+          <div class="row items-center justify-between q-mb-md">
+            <h2 class="text-h5 q-my-none">Dernières publications</h2>
+            <q-btn
+              flat
+              label="Voir plus"
+              color="primary"
+              icon-right="chevron_right"
+              to="/explorer"
+            />
+          </div>
+
+          <div class="row q-col-gutter-md">
+            <div v-for="story in stories" :key="story.id" class="col-xs-12">
+              <q-card flat bordered class="my-card">
+                <q-card-section horizontal>
+                  <!-- Image de couverture réduite -->
+                  <q-img
+                    class="col-2"
+                    :src="`/img/covers/${story.cover}`"
+                    :alt="story.title"
+                    ratio="1"
+                    style="width: 200px"
+                  />
+
+                  <!-- Contenu texte -->
+                  <q-card-section class="col-10">
+                    <div class="text-h6">{{ story.title }}</div>
+                    <div class="text-subtitle2 q-mt-xs">{{ story.author }}</div>
+                    <div class="text-caption text-grey q-mt-sm text-ellipsis-3-lines">
+                      {{ story.description }}
+                    </div>
+
+                    <div class="q-mt-md">
+                      <q-badge
+                        v-for="tag in story.tags"
+                        :key="tag"
+                        color="primary"
+                        class="q-mr-xs q-mb-xs"
+                      >
+                        {{ tag }}
+                      </q-badge>
+                    </div>
+
+                    <div class="text-caption q-mt-md">
+                      <q-icon name="star" color="yellow-8" size="sm" />
+                      <span class="q-ml-xs">{{ story.rating }}/5</span>
+                      <q-icon name="menu_book" color="grey" size="sm" class="q-ml-sm" />
+                      <span class="q-ml-xs">{{ story.chapters }} chapitres</span>
+                      <span class="text-grey q-ml-sm">• {{ story.status }}</span>
+                    </div>
+                  </q-card-section>
+                </q-card-section>
+              </q-card>
+            </div>
+          </div>
+        </section>
+      </div>
+    </q-page-container>
   </q-layout>
 </template>
 
 <script setup>
 import { ref } from 'vue'
-import CategorySection from 'src/components/CategorySection.vue' // Composant réutilisable
+import { useQuasar } from 'quasar'
 
-const loveStories = ref([
-  {
-    title: 'Un amour éternel',
-    author: 'Sophie Laurent',
-    imageUrl: '/img/love1.jpg',
-  },
-  {
-    title: 'Les battements du cœur',
-    author: 'Marc Dupuis',
-    imageUrl: '/img/love2.jpg',
-  },
-  {
-    title: 'À jamais ensemble',
-    author: 'Elodie Martin',
-    imageUrl: '/img/love3.jpg',
-  },
+// Déclaration des variables
+const $q = useQuasar()
+const searchQuery = ref('') // Ajoutez cette ligne
+
+// Données avec images
+const genres = ref([
+  { name: 'Sci-Fi', image: 'sci-fi.jpg' },
+  { name: 'Fantasy', image: 'fantasy.jpg' },
+  { name: 'Aventure', image: 'adventure.jpg' },
+  { name: 'Mystère', image: 'mystery.jpg' },
+  { name: 'Action', image: 'action.jpg' },
+  { name: 'Horreur', image: 'horror.jpg' },
+  { name: 'Humour', image: 'comedy.jpg' },
+  { name: 'Erotique', image: 'erotic.jpg' },
+  { name: 'Poésie', image: 'poetry.jpg' },
+  { name: 'Autre', image: 'other.jpg' },
+  { name: 'Thriller', image: 'thriller.jpg' },
+  { name: 'Romance', image: 'romance.jpg' },
+  { name: 'Enfants', image: 'children.jpg' },
+  { name: 'Drame', image: 'drama.jpg' },
 ])
 
-const detectiveNovels = ref([
-  {
-    title: "L'ombre du crime",
-    author: 'Henri Clément',
-    imageUrl: '/img/detective1.jpg',
-  },
-  {
-    title: 'Enquête fatale',
-    author: 'Julie Verne',
-    imageUrl: '/img/detective2.jpg',
-  },
-  {
-    title: 'Mystère à Paris',
-    author: 'François Leblanc',
-    imageUrl: '/img/detective3.jpg',
-  },
+const fandoms = ref([
+  { name: 'Harry Potter', image: 'harry-potter.jpg' },
+  { name: 'Nautuo', image: 'nautuo.jpg' },
+  { name: 'Supernatural', image: 'supernatural.jpg' },
+  { name: 'Glee', image: 'glee.jpg' },
+  { name: 'Lord of the rings', image: 'lotr.jpg' },
 ])
 
-const scifiBooks = ref([
-  {
-    title: 'Les mondes parallèles',
-    author: 'Arthur Nelson',
-    imageUrl: '/img/scifi1.jpg',
-  },
-  {
-    title: 'L’ère des cyborgs',
-    author: 'Claire Fontaine',
-    imageUrl: '/img/scifi2.jpg',
-  },
-  {
-    title: 'Le voyage interstellaire',
-    author: 'Paul Rivière',
-    imageUrl: '/img/scifi3.jpg',
-  },
+const trendingTags = ref([
+  'Historique',
+  'Sexe',
+  'Sexe Explicite',
+  'Érotique',
+  'Romances',
+  'Amouradolescent',
+  'Romance Lycéenne',
+  'Desfictions',
 ])
+
+const stories = ref([
+  {
+    id: 1,
+    title: 'Sous un ciel sauvage',
+    author: 'Elia_MORGAN',
+    description: "On m'a tout pris. Mon innocence, ma maison, mes désirs. Même celle de vivre...",
+    tags: ['Sauvage', 'Aventures'],
+    rating: 5,
+    chapters: 11,
+    status: 'En cours',
+    cover: 'sous-un-ciel-sauvage.jpg', // Ajout de la propriété cover
+  },
+  {
+    id: 2,
+    title: "Le loup-garou civilisé: l'enlèvement",
+    author: 'Jean_WOLF',
+    description: 'Une histoire de loup-garou dans un monde moderne...',
+    tags: ['Fantasy', 'Drame'],
+    rating: 4,
+    chapters: 7,
+    status: 'En cours',
+    cover: 'loup-garou.jpg', // Ajout de la propriété cover
+  },
+  // Ajoutez plus d'histoires ici...
+])
+
+// Fonction de notification
+function showNotification(message) {
+  $q.notify({
+    message: message,
+    color: 'positive',
+  })
+}
+
+// Implémentation des fonctions
+const performSearch = () => {
+  showNotification(`Recherche: "${searchQuery.value}"`) // Notez les backticks
+  // Logique de recherche ici
+}
+
+const filterByGenre = (genre) => {
+  showNotification(`Filtré par genre: ${genre}`) // Backticks ici aussi
+  // Logique de filtrage ici
+}
+
+const filterByFandom = (fandom) => {
+  showNotification(`Filtré par fandom: ${fandom}`) // Backticks ici aussi
+  // Logique de filtrage ici
+}
 </script>
+
+<style lang="scss" scoped>
+.genre-card,
+.fandom-card {
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.05);
+    z-index: 1;
+  }
+
+  .q-img {
+    height: 120px; /* Taille réduite des images */
+    width: 100%;
+    object-fit: cover;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: inherit;
+    }
+  }
+
+  .genre-label,
+  .fandom-label {
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+    padding: 8px;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 4px;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .genre-card .q-img,
+  .fandom-card .q-img {
+    height: 100px;
+  }
+
+  .genre-label,
+  .fandom-label {
+    font-size: 0.9rem;
+  }
+}
+.my-card {
+  transition: transform 0.2s;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .q-img {
+    border-radius: 4px;
+    object-fit: cover;
+    margin-right: 50px;
+  }
+
+  .text-ellipsis-3-lines {
+    display: -webkit-box;
+
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  @media (max-width: 600px) {
+    .q-card-section--horizontal {
+      flex-direction: row;
+      align-items: flex-start;
+
+      .q-img {
+        width: 80px;
+        min-width: 80px;
+        margin-right: 12px;
+      }
+    }
+  }
+}
+</style>
