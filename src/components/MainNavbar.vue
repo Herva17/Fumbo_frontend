@@ -27,7 +27,7 @@
         <q-btn flat label="A propos" class="hover-underline-animation" to="/about" />
         <q-btn flat label="Ouvrages" class="hover-underline-animation" to="/ouvrage" />
         <q-btn flat label="Publier" class="hover-underline-animation" to="/Enregistrer" />
-        <q-btn flat label="Ecrire" class="hover-underline-animation" to="/Enregistrer" />
+        <q-btn flat label="Ecrire" class="hover-underline-animation" to="/ecrire" />
 
         <!-- Sélecteur de langue -->
         <LangSwitcher class="q-ml-md" />
