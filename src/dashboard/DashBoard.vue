@@ -106,7 +106,7 @@
                 <q-list style="min-width: 100px">
                   <q-item>
                     <q-avatar size="30px" class="q-mr-md">
-                      <q-img :src="user.image || '~assets/user-avatar.png'" />
+                      <q-img :src="getFullImageUrl(user.image)" />
                     </q-avatar>
                     <q-item-section>
                       <q-item-label class="text-h8">{{ user.username }} {{ user.prenom }} </q-item-label>
@@ -302,6 +302,10 @@ onMounted(() => {
 const logout = () => {
   localStorage.removeItem('user'); // Supprime les informations de l'utilisateur du localStorage
   window.location.reload(); // Recharge la page pour réinitialiser l'état
+};
+const getFullImageUrl = (imagePath) => {
+  const baseUrl = 'http://localhost/Api_bibliotheque/uploads/users/' // Remplacez par votre domaine
+  return imagePath.startsWith('http') ? imagePath : `${baseUrl}${imagePath}`
 };
 </script>
 
