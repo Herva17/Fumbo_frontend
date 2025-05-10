@@ -148,10 +148,10 @@ const closeEmailLoginModal = () => {
 const handleLogin = async () => {
   await loginStore.loginUser();
   if (!loginStore.error) {
-    // Stocker les informations de l'utilisateur dans le localStorage
     const userData = {
+      id: loginStore.user.id_user, // ID de l'utilisateur
       username: loginStore.user.username, // Nom de l'utilisateur
-      prenom: loginStore.user.prenom, // Nom de l'utilisateur
+      prenom: loginStore.user.prenom, // Prénom de l'utilisateur
       image: loginStore.user.image, // Image de l'utilisateur
       bio: loginStore.user.bio, // Biographie de l'utilisateur
       email: loginStore.user.email, // Email de l'utilisateur

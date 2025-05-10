@@ -64,7 +64,7 @@
                           <strong>Véronique:</strong> Super histoire, on attend la suite avec
                           impatience, merci !!! 😊
                         </div>
-                        <div class="text-caption text-primary">Live la critique complète</div>
+                        <div class="text-caption text-primary">Lire la critique complète</div>
                       </div>
 
                       <q-separator spaced />
@@ -105,12 +105,16 @@
                 <q-list style="min-width: 100px">
                   <q-item>
                     <q-avatar size="30px" class="q-mr-md">
-                      <q-img :src="getFullImageUrl(user.image)" />
+                      <q-img
+                        :src="getFullImageUrl(user.image)"
+                        alt="Image de profil"
+                        @error="handleImageError"
+                      />
                     </q-avatar>
                     <q-item-section>
                       <q-item-label class="text-h8"
-                        >{{ user.username }} {{ user.prenom }}
-                      </q-item-label>
+                        >{{ user.username }} {{ user.prenom }}</q-item-label
+                      >
                       <q-item-label caption>{{
                         user.bio || 'Biographie non disponible'
                       }}</q-item-label>
@@ -184,22 +188,18 @@
       <q-card class="story-card q-mb-lg">
         <q-card-section horizontal>
           <q-img class="col-3" src="/img/wild-sky.jpg" alt="Au Clair de Lune" />
-
           <q-card-section>
             <div class="text-h6">Au Clair de Lune, Tome 1 : La Lune Vengeresse</div>
             <div class="text-subtitle2 q-mb-sm">★★★★☆</div>
             <p class="story-description">
               Je m'appelle Louva Wild, une Loup-Garou de rang Delta qui mène une vie simple et
-              tranquille jusqu'à ce qu'IL arrive et chamboule absolument tout. Il va s'imposer dans
-              ma vie et la changer pour le m...
+              tranquille jusqu'à ce qu'IL arrive et chamboule absolument tout...
             </p>
-
             <div class="row q-mt-md">
-              <q-chip v-for="tag in ['Fantasy', 'Aventure', 'Loup-Garou']" :key="tag" dense>
-                {{ tag }}
-              </q-chip>
+              <q-chip v-for="tag in ['Fantasy', 'Aventure', 'Loup-Garou']" :key="tag" dense>{{
+                tag
+              }}</q-chip>
             </div>
-
             <div class="row items-center q-mt-sm">
               <div class="col">
                 <span class="text-caption">Par Laura B • Terminé • 54 chapitres</span>
@@ -211,8 +211,6 @@
           </q-card-section>
         </q-card-section>
       </q-card>
-
-      <!-- Histoire 2 -->
       <q-card class="story-card q-mb-lg">
         <q-card-section horizontal>
           <q-img class="col-3" src="/img/werewolf.jpg" alt="Sous un ciel sauvage" />
@@ -280,40 +278,56 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import BannerSection from 'src/components/BannerSection.vue'
-import LangSwitcher from 'src/components/LangSwitcher.vue'
+import { ref, onMounted } from 'vue';
+import BannerSection from 'src/components/BannerSection.vue';
+import LangSwitcher from 'src/components/LangSwitcher.vue';
 
-const filter = ref('Tous')
-const sort = ref('recent')
+const searchQuery = ref(''); // Définition de la propriété searchQuery
+const filter = ref('Tous');
+const sort = ref('recent');
+const filterOptions = ['Tous', 'Fantasy', 'Aventure', 'Romance', 'Drame', 'Horreur', 'Mystère'];
 
-const filterOptions = ['Tous', 'Fantasy', 'Aventure', 'Romance', 'Drame', 'Horreur', 'Mystère']
 const user = ref({
   username: '',
   prenom: '',
   image: '',
   bio: '',
-})
+});
 
 onMounted(() => {
-  const storedUser = localStorage.getItem('user')
+  const storedUser = localStorage.getItem('user');
   if (storedUser) {
-    user.value = JSON.parse(storedUser) // Récupère les informations de l'utilisateur depuis le localStorage
+    try {
+      user.value = JSON.parse(storedUser); // Récupère les informations de l'utilisateur depuis le localStorage
+    } catch (error) {
+      console.error('Erreur lors de la récupération des données utilisateur :', error);
+    }
   }
-})
+});
 
 const logout = () => {
   localStorage.removeItem('user'); // Supprime les informations de l'utilisateur du localStorage
   window.location.reload(); // Recharge la page pour réinitialiser l'état
 };
-const getFullImageUrl = (imagePath) => {
-  const baseUrl = 'http://localhost/Api_bibliotheque/uploads/users/' // Remplacez par votre domaine
-  return imagePath.startsWith('http') ? imagePath : `${baseUrl}${imagePath}`
-};
-  localStorage.removeItem('user') // Supprime les informations de l'utilisateur du localStorage
-  window.location.reload()
-</script>
 
+const getFullImageUrl = (imagePath) => {
+  const baseUrl = 'http://localhost/Api_Bibliotheque/uploads/users/';
+
+  // Vérifie si le chemin de l'image est valide
+  if (!imagePath) {
+    // Retourne une image par défaut si aucun chemin n'est fourni
+    return `${baseUrl}Capture.PNG`;
+  }
+
+  // Retourne l'URL complète si le chemin ne commence pas par "http"
+  return imagePath.startsWith('http') ? imagePath : `${baseUrl}${imagePath}`;
+};
+
+const handleImageError = (event) => {
+  // Remplace l'image par défaut en cas d'erreur de chargement
+  event.target.src = 'http://localhost/Api_Bibliotheque/uploads/users/';
+};
+</script>
 <style scoped>
 .dashboard-page {
   padding: 0px;
@@ -322,12 +336,10 @@ const getFullImageUrl = (imagePath) => {
   max-width: 1500px;
   margin: 0 auto;
 }
-/* Animation de soulignement au survol */
-.hover-underline-animation {
-  position: relative;
-}
-.banner {
-  max-width: 1800px;
+
+.q-avatar img {
+  object-fit: cover;
+  border-radius: 50%;
 }
 
 .story-card {
@@ -342,7 +354,6 @@ const getFullImageUrl = (imagePath) => {
 
 .story-description {
   display: -webkit-box;
-
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;

@@ -7,7 +7,15 @@ export const useLoginStore = defineStore('login', {
     password: '',
     isLoading: false,
     error: null,
-    user: null, // Pour stocker les informations de l'utilisateur connecté
+    user: {
+      id_user: null,
+      username: '',
+      prenom: '',
+      image: '',
+      bio: '',
+      email: '',
+      nationalite: '',
+    }, // Pour stocker les informations de l'utilisateur connecté
   }),
   actions: {
     async loginUser() {
@@ -33,7 +41,7 @@ export const useLoginStore = defineStore('login', {
 
         // Envoyer la requête avec FormData
         const response = await axios.post(
-          'http://localhost/Api_bibliotheque/user/login/?user=herva&mdp=mdp',
+          'http://localhost/Api_Bibliotheque/user/login/?user=herva&mdp=mdp',
           formData, // Envoyer le FormData
           {
             headers: {

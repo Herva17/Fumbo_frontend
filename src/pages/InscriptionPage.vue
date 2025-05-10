@@ -133,7 +133,7 @@ const router = useRouter()
 
 // Fonction pour compléter l'URL de l'image
 const getFullImageUrl = (imagePath) => {
-  const baseUrl = 'http://localhost/Api_bibliotheque/uploads/nationalites/' // Remplacez par votre domaine
+  const baseUrl = 'http://localhost/Api_Bibliotheque/uploads/nationalites/' // Remplacez par votre domaine
   return imagePath.startsWith('http') ? imagePath : `${baseUrl}${imagePath}`
 }
 
@@ -203,17 +203,6 @@ const register = async () => {
   await inscriptionStore.registerUser(form.value)
 
   if (!inscriptionStore.getError) {
-    // Nettoyer les champs après l'enregistrement
-    form.value = {
-      username: '',
-      prenom: '',
-      email: '',
-      password: '',
-      bio: '',
-      image: null,
-      id_nationalite: null,
-    }
-
     // Réinitialiser les validations du formulaire
     formRef.value.resetValidation()
 
