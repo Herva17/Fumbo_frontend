@@ -1,43 +1,8 @@
 <template>
-  <div class="story-editor" role="main">
-    <nav class="navbar" aria-label="Navigation principale">
-      <div class="navbar-right">
-        <q-btn flat round icon="notifications" aria-label="Notifications" class="q-mr-sm notif">
-          <q-badge floating color="red">{{ notificationsCount }}</q-badge>
-          <q-tooltip>Notifications</q-tooltip>
-        </q-btn>
-
-        <q-btn flat round icon="account_circle" aria-label="Profil utilisateur" class="text-black">
-          <q-menu>
-            <q-list style="min-width: 200px">
-              <q-item>
-                <q-avatar size="50px" class="q-mr-md">
-                  <q-img src="~assets/user-avatar.png" alt="Avatar utilisateur" />
-                </q-avatar>
-                <q-item-section>
-                  <q-item-label class="text-h6">Thierry Nirere</q-item-label>
-                  <q-item-label caption>Editeur</q-item-label>
-                </q-item-section>
-              </q-item>
-              <q-separator />
-              <q-item clickable v-ripple to="/profil">
-                <q-item-section avatar>
-                  <q-icon name="person" />
-                </q-item-section>
-                <q-item-section>Profil</q-item-section>
-              </q-item>
-              <q-separator />
-              <q-item clickable v-ripple @click="logout">
-                <q-item-section avatar>
-                  <q-icon name="logout" />
-                </q-item-section>
-                <q-item-section class="text-negative">Déconnexion</q-item-section>
-              </q-item>
-            </q-list>
-          </q-menu>
-          <q-tooltip>Profil utilisateur</q-tooltip>
-        </q-btn>
-
+  <q-page class="story-editor" role="main">
+    <div class="editor-header-container">
+      <HeaderPage />
+      <div class="header-actions">
         <q-btn flat round icon="share" aria-label="Partager" class="text-black">
           <q-menu>
             <q-list style="min-width: 200px">
@@ -76,18 +41,17 @@
             {{ autoSave ? 'Sauvegarde automatique activée' : 'Sauvegarde automatique désactivée' }}
           </q-tooltip>
         </q-btn>
+
+        <button
+          class="options-button"
+          @click="toggleOptions"
+          aria-expanded="showOptions"
+          aria-controls="options-panel"
+        >
+          <q-icon :name="showOptions ? 'menu_open' : 'menu'" />
+          {{ showOptions ? 'Masquer les détails' : 'Afficher les détails' }}
+        </button>
       </div>
-    </nav>
-    <div class="navbar-left">
-      <button
-        class="options-button"
-        @click="toggleOptions"
-        aria-expanded="showOptions"
-        aria-controls="options-panel"
-      >
-        <q-icon :name="showOptions ? 'menu_open' : 'menu'" />
-        {{ showOptions ? 'Masquer les détails' : 'Afficher les détails' }}
-      </button>
     </div>
 
     <div class="editor-container">
@@ -203,316 +167,310 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
-  </div>
+  </q-page>
 </template>
 
-<script>
-import { date } from 'quasar'
+<script setup>
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
+import { useQuasar, date } from 'quasar'
 import jsPDF from 'jspdf'
+import HeaderPage from '../components/HeaderPage.vue'
 
-export default {
-  data() {
-    return {
-      story: '',
-      showOptions: true,
-      autoSave: true,
-      isSaving: false,
-      lastSaved: null,
-      showShareDialog: false,
-      shareUrl: '',
-      notificationsCount: 3,
-      storyDetails: {
+const $q = useQuasar()
+
+// Réactives
+const story = ref('')
+const showOptions = ref(true)
+const autoSave = ref(true)
+const isSaving = ref(false)
+const lastSaved = ref(null)
+const showShareDialog = ref(false)
+const shareUrl = ref('')
+
+const storyDetails = ref({
+  title: '',
+  description: '',
+  mainCharacters: '',
+  category: '',
+  isPublic: false,
+})
+
+const categories = [
+  'Aventure',
+  'Romance',
+  'Science-Fiction',
+  'Fantasy',
+  'Mystère',
+  'Horreur',
+  'Historique',
+  'Contemporain',
+]
+
+// Computed
+const wordCount = computed(() => {
+  return story.value ? story.value.trim().split(/\s+/).length : 0
+})
+
+const characterCount = computed(() => {
+  return story.value ? story.value.length : 0
+})
+
+// Watchers
+watch(story, () => {
+  handleAutoSave()
+})
+
+watch(
+  storyDetails,
+  () => {
+    handleAutoSave()
+  },
+  { deep: true },
+)
+
+// Lifecycle hooks
+onMounted(() => {
+  loadStoryFromLocalStorage()
+  saveInterval.value = setInterval(() => {
+    if (autoSave.value && (story.value || storyDetails.value.title)) {
+      saveStoryToLocalStorage()
+    }
+  }, 30000) // Sauvegarde toutes les 30 secondes
+})
+
+onBeforeUnmount(() => {
+  clearInterval(saveInterval.value)
+})
+
+// Methods
+const saveInterval = ref(null)
+
+const handleAutoSave = () => {
+  if (autoSave.value) {
+    saveStoryToLocalStorage()
+  }
+}
+
+const toggleOptions = () => {
+  showOptions.value = !showOptions.value
+}
+
+const toggleAutoSave = () => {
+  autoSave.value = !autoSave.value
+  if (autoSave.value) {
+    $q.notify({
+      message: 'Sauvegarde automatique activée',
+      color: 'positive',
+      icon: 'cloud_done',
+    })
+  }
+}
+
+const saveDetails = async () => {
+  isSaving.value = true
+  try {
+    await saveStoryToLocalStorage()
+    $q.notify({
+      message: 'Détails sauvegardés avec succès',
+      color: 'positive',
+      icon: 'check_circle',
+    })
+  } catch (error) {
+    console.error('Erreur lors de la sauvegarde:', error)
+    $q.notify({
+      message: 'Erreur lors de la sauvegarde: ' + error.message,
+      color: 'negative',
+      icon: 'error',
+    })
+  } finally {
+    isSaving.value = false
+  }
+}
+
+const resetDetails = () => {
+  $q.dialog({
+    title: 'Confirmation',
+    message: 'Voulez-vous vraiment réinitialiser les détails?',
+    cancel: true,
+    persistent: true,
+  }).onOk(() => {
+    storyDetails.value = {
+      title: '',
+      description: '',
+      mainCharacters: '',
+      category: '',
+      isPublic: false,
+    }
+  })
+}
+
+const exportToPDF = async () => {
+  $q.loading.show({
+    message: 'Génération du PDF en cours...',
+  })
+
+  try {
+    const doc = new jsPDF()
+
+    doc.setFontSize(20)
+    doc.setTextColor(33, 150, 243)
+    doc.text(storyDetails.value.title || 'Sans titre', 105, 20, { align: 'center' })
+
+    if (storyDetails.value.description) {
+      doc.setFontSize(12)
+      doc.setTextColor(100, 100, 100)
+      doc.text(storyDetails.value.description, 105, 30, { align: 'center', maxWidth: 180 })
+    }
+
+    doc.setFontSize(14)
+    doc.setTextColor(0, 0, 0)
+    const lines = doc.splitTextToSize(story.value, 180)
+    doc.text(lines, 15, 50)
+
+    doc.setProperties({
+      title: storyDetails.value.title || 'Histoire sans titre',
+      author: 'Thierry Nirere',
+      creator: "Éditeur d'histoires",
+    })
+
+    doc.save(`${storyDetails.value.title || 'histoire'}.pdf`)
+  } catch (error) {
+    console.error('Erreur lors de la génération du PDF:', error)
+    $q.notify({
+      message: 'Erreur lors de la génération du PDF: ' + error.message,
+      color: 'negative',
+      icon: 'error',
+    })
+  } finally {
+    $q.loading.hide()
+  }
+}
+
+const generateShareLink = async () => {
+  if (!storyDetails.value.title) {
+    $q.notify({
+      message: 'Veuillez donner un titre à votre histoire avant de partager',
+      color: 'warning',
+      icon: 'warning',
+    })
+    return
+  }
+
+  $q.loading.show()
+
+  try {
+    const shareData = {
+      title: storyDetails.value.title,
+      description: storyDetails.value.description,
+      story: story.value,
+      author: 'Thierry Nirere',
+      createdAt: new Date().toISOString(),
+    }
+
+    const encodedData = btoa(JSON.stringify(shareData))
+    shareUrl.value = `${window.location.origin}/shared-story?data=${encodedData}`
+    showShareDialog.value = true
+  } catch (error) {
+    console.error('Erreur lors de la génération du lien:', error)
+    $q.notify({
+      message: 'Erreur lors de la génération du lien: ' + error.message,
+      color: 'negative',
+      icon: 'error',
+    })
+  } finally {
+    $q.loading.hide()
+  }
+}
+
+const copyShareUrl = async () => {
+  try {
+    await navigator.clipboard.writeText(shareUrl.value)
+    $q.notify({
+      message: 'Lien copié dans le presse-papier!',
+      color: 'positive',
+      icon: 'content_copy',
+    })
+  } catch (error) {
+    console.error('Erreur lors de la copie du lien:', error)
+    $q.notify({
+      message: 'Erreur lors de la copie du lien: ' + error.message,
+      color: 'negative',
+      icon: 'error',
+    })
+  }
+}
+
+const saveStoryToLocalStorage = async () => {
+  isSaving.value = true
+  try {
+    const storyData = {
+      story: story.value,
+      details: storyDetails.value,
+      lastSaved: new Date().toISOString(),
+    }
+    localStorage.setItem('savedStory', JSON.stringify(storyData))
+    lastSaved.value = new Date()
+  } catch (error) {
+    console.error('Erreur lors de la sauvegarde locale:', error)
+    $q.notify({
+      message: 'Erreur lors de la sauvegarde locale: ' + error.message,
+      color: 'negative',
+      icon: 'error',
+    })
+  } finally {
+    isSaving.value = false
+  }
+}
+
+const loadStoryFromLocalStorage = () => {
+  try {
+    const savedStory = localStorage.getItem('savedStory')
+    if (savedStory) {
+      const parsedData = JSON.parse(savedStory)
+      story.value = parsedData.story
+      storyDetails.value = parsedData.details || {
         title: '',
         description: '',
         mainCharacters: '',
         category: '',
         isPublic: false,
-      },
-      categories: [
-        'Aventure',
-        'Romance',
-        'Science-Fiction',
-        'Fantasy',
-        'Mystère',
-        'Horreur',
-        'Historique',
-        'Contemporain',
-      ],
-      saveInterval: null,
+      }
+      lastSaved.value = parsedData.lastSaved ? new Date(parsedData.lastSaved) : null
     }
-  },
+  } catch (error) {
+    console.error('Erreur lors du chargement depuis le stockage local:', error)
+    $q.notify({
+      message: 'Erreur lors du chargement: ' + error.message,
+      color: 'negative',
+      icon: 'error',
+    })
+  }
+}
 
-  computed: {
-    wordCount() {
-      return this.story ? this.story.trim().split(/\s+/).length : 0
-    },
-    characterCount() {
-      return this.story ? this.story.length : 0
-    },
-  },
+const formatDate = (dateObj) => {
+  return date.formatDate(dateObj, 'DD/MM/YYYY HH:mm')
+}
 
-  watch: {
-    story() {
-      this.handleAutoSave()
-    },
-    storyDetails: {
-      handler() {
-        this.handleAutoSave()
-      },
-      deep: true,
-    },
-  },
+const handleKeyDown = (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+    e.preventDefault()
+    saveStoryToLocalStorage()
+    $q.notify({
+      message: 'Histoire sauvegardée',
+      color: 'positive',
+      timeout: 1000,
+      position: 'top',
+    })
+  }
+}
 
-  created() {
-    this.loadStoryFromLocalStorage()
-
-    // Configurer l'intervalle de sauvegarde automatique
-    this.saveInterval = setInterval(() => {
-      if (this.autoSave && (this.story || this.storyDetails.title)) {
-        this.saveStoryToLocalStorage()
-      }
-    }, 30000) // Sauvegarde toutes les 30 secondes
-  },
-
-  beforeUnmount() {
-    clearInterval(this.saveInterval)
-  },
-
-  methods: {
-    handleAutoSave() {
-      if (this.autoSave) {
-        this.saveStoryToLocalStorage()
-      }
-    },
-
-    toggleOptions() {
-      this.showOptions = !this.showOptions
-    },
-
-    toggleAutoSave() {
-      this.autoSave = !this.autoSave
-      if (this.autoSave) {
-        this.$q.notify({
-          message: 'Sauvegarde automatique activée',
-          color: 'positive',
-          icon: 'cloud_done',
-        })
-      }
-    },
-
-    async saveDetails() {
-      this.isSaving = true
-      try {
-        await this.saveStoryToLocalStorage()
-        this.$q.notify({
-          message: 'Détails sauvegardés avec succès',
-          color: 'positive',
-          icon: 'check_circle',
-        })
-      } catch (error) {
-        console.error('Erreur lors de la sauvegarde:', error)
-        this.$q.notify({
-          message: 'Erreur lors de la sauvegarde: ' + error.message,
-          color: 'negative',
-          icon: 'error',
-        })
-      } finally {
-        this.isSaving = false
-      }
-    },
-
-    resetDetails() {
-      this.$q
-        .dialog({
-          title: 'Confirmation',
-          message: 'Voulez-vous vraiment réinitialiser les détails?',
-          cancel: true,
-          persistent: true,
-        })
-        .onOk(() => {
-          this.storyDetails = {
-            title: '',
-            description: '',
-            mainCharacters: '',
-            category: '',
-            isPublic: false,
-          }
-        })
-    },
-
-    async exportToPDF() {
-      this.$q.loading.show({
-        message: 'Génération du PDF en cours...',
-      })
-
-      try {
-        const doc = new jsPDF()
-
-        doc.setFontSize(20)
-        doc.setTextColor(33, 150, 243)
-        doc.text(this.storyDetails.title || 'Sans titre', 105, 20, { align: 'center' })
-
-        if (this.storyDetails.description) {
-          doc.setFontSize(12)
-          doc.setTextColor(100, 100, 100)
-          doc.text(this.storyDetails.description, 105, 30, { align: 'center', maxWidth: 180 })
-        }
-
-        doc.setFontSize(14)
-        doc.setTextColor(0, 0, 0)
-        const lines = doc.splitTextToSize(this.story, 180)
-        doc.text(lines, 15, 50)
-
-        doc.setProperties({
-          title: this.storyDetails.title || 'Histoire sans titre',
-          author: 'Thierry Nirere',
-          creator: "Éditeur d'histoires",
-        })
-
-        doc.save(`${this.storyDetails.title || 'histoire'}.pdf`)
-      } catch (error) {
-        console.error('Erreur lors de la génération du PDF:', error)
-        this.$q.notify({
-          message: 'Erreur lors de la génération du PDF: ' + error.message,
-          color: 'negative',
-          icon: 'error',
-        })
-      } finally {
-        this.$q.loading.hide()
-      }
-    },
-
-    async generateShareLink() {
-      if (!this.storyDetails.title) {
-        this.$q.notify({
-          message: 'Veuillez donner un titre à votre histoire avant de partager',
-          color: 'warning',
-          icon: 'warning',
-        })
-        return
-      }
-
-      this.$q.loading.show()
-
-      try {
-        const shareData = {
-          title: this.storyDetails.title,
-          description: this.storyDetails.description,
-          story: this.story,
-          author: 'Thierry Nirere',
-          createdAt: new Date().toISOString(),
-        }
-
-        const encodedData = btoa(JSON.stringify(shareData))
-        this.shareUrl = `${window.location.origin}/shared-story?data=${encodedData}`
-        this.showShareDialog = true
-      } catch (error) {
-        console.error('Erreur lors de la génération du lien:', error)
-        this.$q.notify({
-          message: 'Erreur lors de la génération du lien: ' + error.message,
-          color: 'negative',
-          icon: 'error',
-        })
-      } finally {
-        this.$q.loading.hide()
-      }
-    },
-
-    async copyShareUrl() {
-      try {
-        await navigator.clipboard.writeText(this.shareUrl)
-        this.$q.notify({
-          message: 'Lien copié dans le presse-papier!',
-          color: 'positive',
-          icon: 'content_copy',
-        })
-      } catch (error) {
-        console.error('Erreur lors de la copie du lien:', error)
-        this.$q.notify({
-          message: 'Erreur lors de la copie du lien: ' + error.message,
-          color: 'negative',
-          icon: 'error',
-        })
-      }
-    },
-
-    async saveStoryToLocalStorage() {
-      this.isSaving = true
-      try {
-        const storyData = {
-          story: this.story,
-          details: this.storyDetails,
-          lastSaved: new Date().toISOString(),
-        }
-        localStorage.setItem('savedStory', JSON.stringify(storyData))
-        this.lastSaved = new Date()
-      } catch (error) {
-        console.error('Erreur lors de la sauvegarde locale:', error)
-        this.$q.notify({
-          message: 'Erreur lors de la sauvegarde locale: ' + error.message,
-          color: 'negative',
-          icon: 'error',
-        })
-      } finally {
-        this.isSaving = false
-      }
-    },
-
-    loadStoryFromLocalStorage() {
-      try {
-        const savedStory = localStorage.getItem('savedStory')
-        if (savedStory) {
-          const parsedData = JSON.parse(savedStory)
-          this.story = parsedData.story
-          this.storyDetails = parsedData.details || {
-            title: '',
-            description: '',
-            mainCharacters: '',
-            category: '',
-            isPublic: false,
-          }
-          this.lastSaved = parsedData.lastSaved ? new Date(parsedData.lastSaved) : null
-        }
-      } catch (error) {
-        console.error('Erreur lors du chargement depuis le stockage local:', error)
-        this.$q.notify({
-          message: 'Erreur lors du chargement: ' + error.message,
-          color: 'negative',
-          icon: 'error',
-        })
-      }
-    },
-
-    formatDate(dateObj) {
-      return date.formatDate(dateObj, 'DD/MM/YYYY HH:mm')
-    },
-
-    handleKeyDown(e) {
-      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-        e.preventDefault()
-        this.saveStoryToLocalStorage()
-        this.$q.notify({
-          message: 'Histoire sauvegardée',
-          color: 'positive',
-          timeout: 1000,
-          position: 'top',
-        })
-      }
-    },
-
-    logout() {
-      this.$q
-        .dialog({
-          title: 'Déconnexion',
-          message: 'Êtes-vous sûr de vouloir vous déconnecter?',
-          cancel: true,
-          persistent: true,
-        })
-        .onOk(() => {
-          this.$router.push('/login')
-        })
-    },
-  },
+const publishStory = () => {
+  // Implémentez cette fonction selon vos besoins
+  $q.notify({
+    message: 'Fonctionnalité de publication à implémenter',
+    color: 'info',
+    icon: 'info',
+  })
 }
 </script>
 
@@ -532,13 +490,19 @@ export default {
   flex-direction: column;
 }
 
-.navbar {
+.editor-header-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-  padding: 10px 0;
+  padding-bottom: 10px;
   border-bottom: 1px solid #eee;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .options-button {
@@ -654,7 +618,7 @@ export default {
 }
 
 .story-textarea :deep(.q-field__control) {
-  min-height: calc(100vh -300px);
+  min-height: calc(100vh - 300px);
 }
 
 .editor-footer {
@@ -709,15 +673,21 @@ export default {
     display: block;
   }
 
-  .story-textarea >>> .q-field__control {
+  .story-textarea :deep(.q-field__control) {
     min-height: 300px;
   }
 }
 
 @media (max-width: 576px) {
-  .navbar-right {
-    display: flex;
-    gap: 5px;
+  .editor-header-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .header-actions {
+    width: 100%;
+    justify-content: space-between;
   }
 
   .title {

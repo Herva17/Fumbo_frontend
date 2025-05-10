@@ -1,48 +1,7 @@
 <template>
-  <!-- Header amélioré avec transitions -->
-  <q-header elevated class="bg-white text-black shadow-sm">
-    <q-toolbar>
-      <q-btn flat class="text-weight-bold text-h5 text-primary" to="/">Fumbo</q-btn>
-      <q-space />
-
-      <transition name="fade">
-        <q-input
-          v-if="showSearch"
-          dense
-          filled
-          rounded
-          placeholder="Rechercher..."
-          class="q-mr-md"
-          v-model="searchQuery"
-          @blur="showSearch = false"
-        >
-          <template v-slot:append>
-            <q-icon name="search" />
-          </template>
-        </q-input>
-      </transition>
-
-      <q-btn flat round icon="search" @click="showSearch = !showSearch" class="q-mr-sm" />
-
-      <q-btn flat label="A propos" class="hover-underline-animation" to="/about" />
-      <q-btn flat label="Publier" class="hover-underline-animation" to="/publish" />
-      <q-btn flat label="Ouvrages" class="hover-underline-animation" to="/ouvrage" />
-
-      <q-btn
-        rounded
-        unelevated
-        color="primary"
-        label="S'inscrire"
-        class="q-ml-md text-white"
-        to="/register"
-      />
-    </q-toolbar>
-  </q-header>
-
-  <q-separator spaced />
-
   <!-- Contenu principal avec animations -->
-  <div class="savestory">
+  <q-page class="savestory">
+    <HeaderPage />
     <!-- Section de description avec gradient -->
     <section class="description q-pa-lg rounded-borders shadow-2">
       <h3 class="text-h4 text-weight-bold text-center q-mb-md text-gradient">
@@ -146,224 +105,198 @@
         :disable="!isFormValid"
       />
     </section>
-  </div>
+  </q-page>
 </template>
 
-<script>
+<script setup>
 import { ref, computed, onMounted } from 'vue'
+import HeaderPage from 'src/components/HeaderPage.vue'
 import { useQuasar } from 'quasar'
 
-export default {
-  setup() {
-    const $q = useQuasar()
-    const showSearch = ref(false)
-    const searchQuery = ref('')
-    const storyText = ref('')
-    const wordCount = ref(0)
+const $q = useQuasar()
+const storyText = ref('')
+const wordCount = ref(0)
 
-    // Audio recording
-    const isRecording = ref(false)
-    const isPaused = ref(false)
-    const audioBlob = ref(null)
-    const audioUrl = ref('')
-    const recordingTime = ref('00:00')
-    const mediaRecorder = ref(null)
-    const audioChunks = ref([])
-    const visualizer = ref(null)
-    const audioContext = ref(null)
-    const analyser = ref(null)
-    const dataArray = ref(null)
-    const animationId = ref(null)
+// Audio recording
+const isRecording = ref(false)
+const isPaused = ref(false)
+const audioBlob = ref(null)
+const audioUrl = ref('')
+const recordingTime = ref('00:00')
+const mediaRecorder = ref(null)
+const audioChunks = ref([])
+const visualizer = ref(null)
+const audioContext = ref(null)
+const analyser = ref(null)
+const dataArray = ref(null)
+const animationId = ref(null)
 
-    const updateWordCount = () => {
-      if (!storyText.value.trim()) {
-        wordCount.value = 0
-        return
-      }
-      wordCount.value = storyText.value.trim().split(/\s+/).length
-    }
-
-    const isFormValid = computed(() => {
-      return wordCount.value > 0 && wordCount.value <= 250
-    })
-
-    const startRecording = async () => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-        setupAudioContext(stream)
-
-        mediaRecorder.value = new MediaRecorder(stream)
-        audioChunks.value = []
-
-        mediaRecorder.value.ondataavailable = (e) => {
-          audioChunks.value.push(e.data)
-        }
-
-        mediaRecorder.value.onstop = () => {
-          const audioBlobValue = new Blob(audioChunks.value, { type: 'audio/wav' })
-          audioBlob.value = audioBlobValue
-          audioUrl.value = URL.createObjectURL(audioBlobValue)
-          stream.getTracks().forEach((track) => track.stop())
-          cancelAnimationFrame(animationId.value)
-        }
-
-        mediaRecorder.value.start()
-        isRecording.value = true
-        startTimer()
-        drawVisualizer()
-      } catch (error) {
-        console.error('Error accessing microphone:', error)
-        $q.notify({
-          type: 'negative',
-          message: "Accès au microphone refusé. Veuillez autoriser l'accès pour enregistrer.",
-        })
-      }
-    }
-
-    const setupAudioContext = (stream) => {
-      audioContext.value = new (window.AudioContext || window.webkitAudioContext)()
-      analyser.value = audioContext.value.createAnalyser()
-      const source = audioContext.value.createMediaStreamSource(stream)
-      source.connect(analyser.value)
-      analyser.value.connect(audioContext.value.destination)
-      analyser.value.fftSize = 256
-
-      const bufferLength = analyser.value.frequencyBinCount
-      dataArray.value = new Uint8Array(bufferLength)
-    }
-
-    const drawVisualizer = () => {
-      if (!isRecording.value || !visualizer.value) return
-
-      const canvas = visualizer.value.querySelector('canvas')
-      const ctx = canvas.getContext('2d')
-      const width = (canvas.width = visualizer.value.offsetWidth)
-      const height = (canvas.height = 100)
-
-      analyser.value.getByteFrequencyData(dataArray.value)
-
-      ctx.fillStyle = 'rgb(200, 200, 200)'
-      ctx.fillRect(0, 0, width, height)
-
-      const barWidth = (width / dataArray.value.length) * 2.5
-      let x = 0
-
-      for (let i = 0; i < dataArray.value.length; i++) {
-        const barHeight = dataArray.value[i] / 2
-
-        ctx.fillStyle = `rgb(50, 50, ${barHeight + 100})`
-        ctx.fillRect(x, height - barHeight, barWidth, barHeight)
-
-        x += barWidth + 1
-      }
-
-      animationId.value = requestAnimationFrame(drawVisualizer)
-    }
-
-    const startTimer = () => {
-      let seconds = 0
-      const timer = setInterval(() => {
-        if (!isRecording.value || isPaused.value) {
-          clearInterval(timer)
-          return
-        }
-
-        seconds++
-        const mins = Math.floor(seconds / 60)
-          .toString()
-          .padStart(2, '0')
-        const secs = (seconds % 60).toString().padStart(2, '0')
-        recordingTime.value = `${mins}:${secs}`
-
-        // Auto-stop after 5 minutes
-        if (seconds >= 300) {
-          stopRecording()
-        }
-      }, 1000)
-    }
-
-    const stopRecording = () => {
-      if (mediaRecorder.value && isRecording.value) {
-        mediaRecorder.value.stop()
-        isRecording.value = false
-        isPaused.value = false
-      }
-    }
-
-    const togglePause = () => {
-      if (!mediaRecorder.value) return
-
-      if (isPaused.value) {
-        mediaRecorder.value.resume()
-        isPaused.value = false
-        drawVisualizer()
-      } else {
-        mediaRecorder.value.pause()
-        isPaused.value = true
-        cancelAnimationFrame(animationId.value)
-      }
-    }
-
-    const resetRecording = () => {
-      audioBlob.value = null
-      audioUrl.value = ''
-      recordingTime.value = '00:00'
-    }
-
-    const saveRecording = () => {
-      $q.notify({
-        type: 'positive',
-        message: 'Votre enregistrement a été sauvegardé avec succès!',
-      })
-      // Ici vous pourriez ajouter la logique pour envoyer l'audio au serveur
-    }
-
-    const submitStory = () => {
-      if (!isFormValid.value) return
-
-      $q.notify({
-        type: 'positive',
-        message: 'Votre histoire a été soumise avec succès!',
-      })
-
-      // Reset form
-      storyText.value = ''
-      wordCount.value = 0
-      audioBlob.value = null
-      audioUrl.value = ''
-    }
-
-    onMounted(() => {
-      // Set canvas size when component mounts
-      if (visualizer.value) {
-        const canvas = visualizer.value.querySelector('canvas')
-        canvas.width = visualizer.value.offsetWidth
-        canvas.height = 100
-      }
-    })
-
-    return {
-      showSearch,
-      searchQuery,
-      storyText,
-      wordCount,
-      isRecording,
-      isPaused,
-      audioBlob,
-      audioUrl,
-      recordingTime,
-      visualizer,
-      isFormValid,
-      updateWordCount,
-      startRecording,
-      stopRecording,
-      togglePause,
-      resetRecording,
-      saveRecording,
-      submitStory,
-    }
-  },
+const updateWordCount = () => {
+  if (!storyText.value.trim()) {
+    wordCount.value = 0
+    return
+  }
+  wordCount.value = storyText.value.trim().split(/\s+/).length
 }
+
+const isFormValid = computed(() => {
+  return wordCount.value > 0 && wordCount.value <= 250
+})
+
+const startRecording = async () => {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+    setupAudioContext(stream)
+
+    mediaRecorder.value = new MediaRecorder(stream)
+    audioChunks.value = []
+
+    mediaRecorder.value.ondataavailable = (e) => {
+      audioChunks.value.push(e.data)
+    }
+
+    mediaRecorder.value.onstop = () => {
+      const audioBlobValue = new Blob(audioChunks.value, { type: 'audio/wav' })
+      audioBlob.value = audioBlobValue
+      audioUrl.value = URL.createObjectURL(audioBlobValue)
+      stream.getTracks().forEach((track) => track.stop())
+      cancelAnimationFrame(animationId.value)
+    }
+
+    mediaRecorder.value.start()
+    isRecording.value = true
+    startTimer()
+    drawVisualizer()
+  } catch (error) {
+    console.error('Error accessing microphone:', error)
+    $q.notify({
+      type: 'negative',
+      message: "Accès au microphone refusé. Veuillez autoriser l'accès pour enregistrer.",
+    })
+  }
+}
+
+const setupAudioContext = (stream) => {
+  audioContext.value = new (window.AudioContext || window.webkitAudioContext)()
+  analyser.value = audioContext.value.createAnalyser()
+  const source = audioContext.value.createMediaStreamSource(stream)
+  source.connect(analyser.value)
+  analyser.value.connect(audioContext.value.destination)
+  analyser.value.fftSize = 256
+
+  const bufferLength = analyser.value.frequencyBinCount
+  dataArray.value = new Uint8Array(bufferLength)
+}
+
+const drawVisualizer = () => {
+  if (!isRecording.value || !visualizer.value) return
+
+  const canvas = visualizer.value.querySelector('canvas')
+  const ctx = canvas.getContext('2d')
+  const width = (canvas.width = visualizer.value.offsetWidth)
+  const height = (canvas.height = 100)
+
+  analyser.value.getByteFrequencyData(dataArray.value)
+
+  ctx.fillStyle = 'rgb(200, 200, 200)'
+  ctx.fillRect(0, 0, width, height)
+
+  const barWidth = (width / dataArray.value.length) * 2.5
+  let x = 0
+
+  for (let i = 0; i < dataArray.value.length; i++) {
+    const barHeight = dataArray.value[i] / 2
+
+    ctx.fillStyle = `rgb(50, 50, ${barHeight + 100})`
+    ctx.fillRect(x, height - barHeight, barWidth, barHeight)
+
+    x += barWidth + 1
+  }
+
+  animationId.value = requestAnimationFrame(drawVisualizer)
+}
+
+const startTimer = () => {
+  let seconds = 0
+  const timer = setInterval(() => {
+    if (!isRecording.value || isPaused.value) {
+      clearInterval(timer)
+      return
+    }
+
+    seconds++
+    const mins = Math.floor(seconds / 60)
+      .toString()
+      .padStart(2, '0')
+    const secs = (seconds % 60).toString().padStart(2, '0')
+    recordingTime.value = `${mins}:${secs}`
+
+    // Auto-stop after 5 minutes
+    if (seconds >= 300) {
+      stopRecording()
+    }
+  }, 1000)
+}
+
+const stopRecording = () => {
+  if (mediaRecorder.value && isRecording.value) {
+    mediaRecorder.value.stop()
+    isRecording.value = false
+    isPaused.value = false
+  }
+}
+
+const togglePause = () => {
+  if (!mediaRecorder.value) return
+
+  if (isPaused.value) {
+    mediaRecorder.value.resume()
+    isPaused.value = false
+    drawVisualizer()
+  } else {
+    mediaRecorder.value.pause()
+    isPaused.value = true
+    cancelAnimationFrame(animationId.value)
+  }
+}
+
+const resetRecording = () => {
+  audioBlob.value = null
+  audioUrl.value = ''
+  recordingTime.value = '00:00'
+}
+
+const saveRecording = () => {
+  $q.notify({
+    type: 'positive',
+    message: 'Votre enregistrement a été sauvegardé avec succès!',
+  })
+  // Ici vous pourriez ajouter la logique pour envoyer l'audio au serveur
+}
+
+const submitStory = () => {
+  if (!isFormValid.value) return
+
+  $q.notify({
+    type: 'positive',
+    message: 'Votre histoire a été soumise avec succès!',
+  })
+
+  // Reset form
+  storyText.value = ''
+  wordCount.value = 0
+  audioBlob.value = null
+  audioUrl.value = ''
+}
+
+onMounted(() => {
+  // Set canvas size when component mounts
+  if (visualizer.value) {
+    const canvas = visualizer.value.querySelector('canvas')
+    canvas.width = visualizer.value.offsetWidth
+    canvas.height = 100
+  }
+})
 </script>
 
 <style scoped>

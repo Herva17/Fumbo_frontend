@@ -21,4 +21,36 @@ export default defineBoot(({ app }) => {
   //       so you can easily perform requests against your app's API
 })
 
+// Mock pour le développement
+if (process.env.DEV) {
+  api.interceptors.response.use((response) => {
+    // Simulez vos données de réponse ici
+    if (response.config.url.includes('/books')) {
+      return {
+        data: [
+          {
+            id: 1,
+            title: 'Sous un ciel sauvage',
+            author: 'Elia_MORGAN',
+            description: "On m'a tout pris...",
+            tags: ['Sauvage', 'Aventures'],
+            genre: 'Aventure',
+            fandoms: [],
+            rating: 5,
+            chapters: 11,
+            status: 'En cours',
+            cover: 'sous-un-ciel-sauvage.jpg',
+            chapter: [
+              { number: 1, title: 'Le commencement' },
+              { number: 2, title: 'La rencontre' },
+            ],
+          },
+          // ... autres livres
+        ],
+      }
+    }
+    return response
+  })
+}
+
 export { api }
