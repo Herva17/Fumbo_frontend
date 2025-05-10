@@ -17,6 +17,34 @@ const routes = [
         component: () => import('pages/HistoirePage.vue'),
       },
       {
+        path: '/book/:id',
+        name: 'book-details',
+        component: () => import('src/Details/BookDetails.vue'),
+        props: true,
+      },
+      {
+        path: '/category/:category',
+        name: 'category',
+        component: () => import('src/Details/CategoryPage.vue'),
+        props: true,
+      },
+      {
+        path: '/fandom/:fandom',
+        name: 'fandom',
+        component: () => import('src/Details/CategoryPage.vue'),
+        props: (route) => ({
+          filterType: 'fandom',
+          filterValue: route.params.fandom,
+        }),
+      },
+      {
+        path: '/ecouter/:bookId/:chapterId?',
+        name: 'reader',
+        component: () => import('src/Details/ApercuBook.vue'),
+        props: true,
+      },
+
+      {
         path: '/raconter',
         component: () => import('src/components/SaveStory.vue'),
       },

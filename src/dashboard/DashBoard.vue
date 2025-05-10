@@ -155,6 +155,9 @@
         <q-separator spaced />
       </q-toolbar>
     </q-header>
+
+    <HeaderPage />
+
     <q-separator />
     <BannerSection class="banner" />
     <q-separator />
@@ -325,9 +328,10 @@ const getFullImageUrl = (imagePath) => {
 
 const handleImageError = (event) => {
   // Remplace l'image par défaut en cas d'erreur de chargement
-  event.target.src = 'http://localhost/Api_Bibliotheque/uploads/users/';
+  event.target.src = 'http://localhost/Api_Bibliotheque/uploads/users/Capture.PNG';
 };
 </script>
+
 <style scoped>
 .dashboard-page {
   padding: 0px;

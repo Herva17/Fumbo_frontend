@@ -1,39 +1,5 @@
 <template>
   <q-layout view="hHh lpR fFf">
-    <q-header elevated class="bg-white text-black shadow-sm">
-      <q-toolbar>
-        <q-toolbar-title class="text-weight-bold text-h5 text-primary">
-          <q-icon name="menu_book" class="q-mr-sm" />
-          Fumbo
-        </q-toolbar-title>
-
-        <q-space />
-
-        <!-- Barre de recherche utilisant performSearch -->
-        <q-input
-          v-model="searchQuery"
-          placeholder="Rechercher..."
-          dense
-          @keyup.enter="performSearch"
-        >
-          <template v-slot:append>
-            <q-icon name="search" @click="performSearch" />
-          </template>
-        </q-input>
-
-        <div class="flex items-center gap-4">
-          <q-btn flat label="Livres gratuits" class="hover-underline-animation" to="/ouvrage" />
-          <q-btn flat label="Ecrire" class="hover-underline-animation" to="/ecrire" />
-
-          <ProfileMenu
-            :user="currentUser"
-            :stats="userStats"
-            @show-premium="showPremiumOffer = true"
-          />
-        </div>
-      </q-toolbar>
-    </q-header>
-
     <q-page-container>
       <div class="q-pa-md">
         <!-- Section Catégories/Genres -->
@@ -125,7 +91,12 @@
 
           <div class="row q-col-gutter-md">
             <div v-for="story in stories" :key="story.id" class="col-xs-12">
-              <q-card flat bordered class="my-card">
+              <q-card
+                flat
+                bordered
+                class="my-card cursor-pointer"
+                @click="$router.push(`/book/${story.id}`)"
+              >
                 <q-card-section horizontal>
                   <!-- Image de couverture réduite -->
                   <q-img
@@ -175,11 +146,17 @@
 
 <script setup>
 import { ref } from 'vue'
-import { useQuasar } from 'quasar'
+import { useRouter } from 'vue-router'
 
-// Déclaration des variables
-const $q = useQuasar()
-const searchQuery = ref('') // Ajoutez cette ligne
+const router = useRouter()
+
+const filterByGenre = (genre) => {
+  router.push(`/category/${genre.toLowerCase()}`)
+}
+
+const filterByFandom = (fandom) => {
+  router.push(`/fandom/${fandom.toLowerCase()}`)
+}
 
 // Données avec images
 const genres = ref([
@@ -243,30 +220,6 @@ const stories = ref([
   },
   // Ajoutez plus d'histoires ici...
 ])
-
-// Fonction de notification
-function showNotification(message) {
-  $q.notify({
-    message: message,
-    color: 'positive',
-  })
-}
-
-// Implémentation des fonctions
-const performSearch = () => {
-  showNotification(`Recherche: "${searchQuery.value}"`) // Notez les backticks
-  // Logique de recherche ici
-}
-
-const filterByGenre = (genre) => {
-  showNotification(`Filtré par genre: ${genre}`) // Backticks ici aussi
-  // Logique de filtrage ici
-}
-
-const filterByFandom = (fandom) => {
-  showNotification(`Filtré par fandom: ${fandom}`) // Backticks ici aussi
-  // Logique de filtrage ici
-}
 </script>
 
 <style lang="scss" scoped>

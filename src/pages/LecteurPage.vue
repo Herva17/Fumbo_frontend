@@ -1,50 +1,7 @@
 <template>
   <q-page class="dashboard-page bg-grey-1">
     <!-- Header amélioré avec transitions -->
-    <q-header elevated class="bg-white text-black shadow-sm">
-      <q-toolbar>
-        <q-toolbar-title class="text-weight-bold text-h5 text-primary">Fumbo</q-toolbar-title>
-        <q-space />
-
-        <!-- Champ de recherche animé -->
-        <transition name="fade">
-          <q-input
-            v-if="showSearch"
-            dense
-            filled
-            rounded
-            placeholder="Rechercher..."
-            class="q-mr-md"
-            v-model="searchQuery"
-            @blur="showSearch = false"
-          >
-            <template v-slot:append>
-              <q-icon name="search" />
-            </template>
-          </q-input>
-        </transition>
-
-        <q-btn flat round icon="search" @click="showSearch = !showSearch" class="q-mr-sm" />
-
-        <!-- Navigation principale -->
-        <div class="flex items-center gap-4">
-          <q-btn flat label="Livres gratuits" class="hover-underline-animation" to="/ouvrage" />
-          <q-btn flat label="Ecrire" class="hover-underline-animation" to="/ecrire" />
-          <q-btn flat label="Publier" class="hover-underline-animation" to="/publier" />
-          <q-btn flat label="Raconter" class="hover-underline-animation" to="/raconter" />
-          <q-btn flat label="Ecouter" class="hover-underline-animation" to="/ecouter" />
-
-          <!-- Actions utilisateur -->
-          <div class="col-auto row items-center q-gutter-sm">
-            <LangSwitcher class="q-ml-md" />
-            <q-space />
-            <NotificationMenu />
-            <ProfileMenu :user="currentUser" />
-          </div>
-        </div>
-      </q-toolbar>
-    </q-header>
-
+    <HeaderPage />
     <!-- Lecteur audio amélioré -->
     <div class="audio-player-container bg-white shadow-5">
       <!-- Visualiseur audio -->
@@ -244,11 +201,9 @@
 </template>
 
 <script setup>
+import HeaderPage from 'src/components/HeaderPage.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useQuasar } from 'quasar'
-import NotificationMenu from 'components/NotificationMenu.vue'
-import ProfileMenu from 'components/ProfileMenu.vue'
-import LangSwitcher from 'components/LangSwitcher.vue'
 
 const $q = useQuasar()
 
@@ -266,7 +221,6 @@ const isRepeat = ref(false)
 const isFavorite = ref(false)
 const rating = ref(3)
 const playbackRate = ref(1)
-const showSearch = ref(false)
 const showTrackMenu = ref(false)
 const selectedTrack = ref(null)
 
@@ -277,13 +231,6 @@ const speedOptions = [
   { label: '1.5x', value: 1.5 },
   { label: '2.0x', value: 2 },
 ]
-
-// Données utilisateur
-const currentUser = ref({
-  name: 'Thierry Nirere',
-  role: 'utilisateur',
-  avatar: '/img/user-avatar.png',
-})
 
 // Liste de lecture
 const playlist = ref([
