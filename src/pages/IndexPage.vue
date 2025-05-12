@@ -10,12 +10,16 @@
 
     <!-- HERO SECTION IMMERSIVE -->
     <section class="hero-section">
-      <q-parallax :height="10" :speed="0.5" class="hero-parallax">
-        <template v-slot:media>
-          <q-img src="/img/hero-about.jpg" class="hero-image" />
+      <q-parallax :height="10" :speed="0.5" class="hero-parallax"> 
+        <template v-slot:media><br><br>
+          <q-img
+            src="/img/hero-about.jpg"
+            class="hero-image "
+          
+          />
         </template>
 
-        <div class="hero-content text-center">
+        <div class="hero-content text-center"><br><br>
           <h1 class="hero-title animate__animated animate__fadeInDown text-white">
             Fumbo - L'Âme des Histoires Africaines
           </h1>
@@ -136,7 +140,7 @@
                   label="Écouter"
                   icon-right="arrow_forward"
                   class="q-mt-sm"
-                  to="/ecouter"
+                  to="/"
                 />
               </q-card-section>
             </q-card>
@@ -157,7 +161,7 @@
                   label="Commencer"
                   icon-right="arrow_forward"
                   class="q-mt-sm"
-                  to="/write"
+                  to="/connection"
                 />
               </q-card-section>
             </q-card>
@@ -178,7 +182,7 @@
                   label="En savoir plus"
                   icon-right="arrow_forward"
                   class="q-mt-sm"
-                  to="create-book"
+                  to="connection"
                 />
               </q-card-section>
             </q-card>
@@ -277,7 +281,7 @@
             label="S'inscrire gratuitement"
             size="lg"
             class="q-mx-sm"
-            to="/inscription"
+            to="/connection"
           />
           <q-btn
             outline

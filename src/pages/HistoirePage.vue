@@ -1,5 +1,6 @@
 <template>
   <q-layout view="hHh lpR fFf">
+       <MainNavbar />
     <q-page-container>
       <div class="q-pa-md">
         <!-- Section Catégories/Genres -->
@@ -61,7 +62,7 @@
             label="Plus de fanfictions →"
             color="primary"
             class="q-mt-sm"
-            to="/fanfictions"
+            to="/connection"
           />
         </section>
 
@@ -85,7 +86,7 @@
               label="Voir plus"
               color="primary"
               icon-right="chevron_right"
-              to="/explorer"
+              to="/connection"
             />
           </div>
 
@@ -141,12 +142,15 @@
         </section>
       </div>
     </q-page-container>
+    <InfoSection />
   </q-layout>
 </template>
 
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import MainNavbar from 'src/components/MainNavbar.vue'
+import InfoSection from 'src/components/InfoSection.vue'
 
 const router = useRouter()
 

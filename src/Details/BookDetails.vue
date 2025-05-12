@@ -1,6 +1,6 @@
 <template>
   <q-layout view="hHh lpR fFf">
-    <HeaderPage />
+   <Navbar />
     <q-page-container>
       <div class="q-pa-md">
         <q-btn
@@ -88,13 +88,16 @@
         </q-card>
       </div>
     </q-page-container>
+     <InfoSection />
   </q-layout>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import HeaderPage from 'src/components/HeaderPage.vue'
+import Navbar from 'src/components/MainNavbar.vue'
+
+import InfoSection from 'src/components/InfoSection.vue'
 import { api } from 'src/boot/axios'
 
 const route = useRoute()

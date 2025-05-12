@@ -1,6 +1,6 @@
 <template>
   <q-layout view="hHh lpR fFf">
-    <HeaderPage />
+     <Navbar />
     <q-page-container>
       <div class="q-pa-md">
         <q-btn
@@ -50,12 +50,15 @@
         </div>
       </div>
     </q-page-container>
+   <InfoSection />
   </q-layout>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import HeaderPage from 'src/components/HeaderPage.vue'
+import Navbar from 'src/components/MainNavbar.vue'
+
+import InfoSection from 'src/components/InfoSection.vue'
 import { api } from 'src/boot/axios'
 
 const props = defineProps({

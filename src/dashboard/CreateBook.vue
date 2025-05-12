@@ -1,6 +1,5 @@
 <template>
   <q-page class="dashboard-page">
-<<<<<<< HEAD
     <q-header elevated class="bg-white text-black shadow-sm">
       <q-toolbar>
         <q-toolbar-title class="text-weight-bold text-h5">Fumbo</q-toolbar-title>
@@ -21,12 +20,12 @@
     </q-header>
 
     <q-separator />
-=======
+
     <HeaderPage />
     <q-separator />
 
     <!-- Header animé -->
->>>>>>> aa45c0a4d9f8ff6d16e109309b6ef29813296eb0
+
     <q-card-section
       class="bg-blue-1 text-black rounded-borders section"
       style="border-radius: 10px 10px 0 0"
@@ -226,12 +225,9 @@
 </template>
 
 <script setup>
-<<<<<<< HEAD
+
 import { ref, onMounted } from 'vue'
-=======
-import { ref } from 'vue'
 import HeaderPage from 'src/components/HeaderPage.vue'
->>>>>>> aa45c0a4d9f8ff6d16e109309b6ef29813296eb0
 import { useQuasar } from 'quasar'
 
 const $q = useQuasar()
