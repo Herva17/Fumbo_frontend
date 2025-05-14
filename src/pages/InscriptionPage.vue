@@ -2,14 +2,16 @@
   <q-page class="register-page flex flex-center">
     <q-card class="q-pa-md q-card-shadow animated-card">
       <!-- Affichage du message de succès en haut -->
-      <q-card v-if="successMessage" flat bordered class="q-mb-md text-center success-card">
-        <q-card-section>
-          <q-icon name="thumb_up" size="50px" color="green" />
-          <div class="text-h6 text-positive q-mt-sm">Votre compte a été créé avec succès !</div>
-          <div class="text-caption q-mt-sm">Veuillez patienter pendant 15 secondes...</div>
-          <q-spinner-dots size="40px" color="primary" class="q-mt-md" />
-        </q-card-section>
-      </q-card>
+     <q-dialog v-model="showSuccessModal" persistent>
+        <q-card class="text-center success-card">
+          <q-card-section>
+            <q-icon name="thumb_up" size="50px" color="green" />
+            <div class="text-h6 text-positive q-mt-sm">Votre compte a été créé avec succès !</div>
+            <div class="text-caption q-mt-sm">Veiller vous connectez avec votre email</div>
+            <q-spinner-dots size="40px" color="primary" class="q-mt-md" />
+          </q-card-section>
+        </q-card>
+      </q-dialog>
 
       <!-- Titre -->
       <q-card-section>
@@ -51,7 +53,6 @@
             outlined
             dense
             class="q-mb-md"
-            :rules="[validatePassword]"
           >
             <template v-slot:append>
               <q-icon
@@ -163,15 +164,6 @@ const validateEmail = (val) => {
   return emailRegex.test(val) || 'Veuillez entrer une adresse e-mail valide avec un arobase (@).'
 }
 
-// Validation du mot de passe
-const validatePassword = (val) => {
-  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>])[A-Za-z\d!@#$%^&*(),.?":{}|<>]{8,}$/
-  return (
-    passwordRegex.test(val) ||
-    'Le mot de passe doit contenir au moins 8 caractères, une lettre majuscule, une lettre minuscule, un chiffre et un symbole.'
-  )
-}
-
 // Méthode pour gérer l'ajout de l'image
 const onImageAdded = (files) => {
   if (files.length > 0) {
@@ -190,7 +182,10 @@ onMounted(() => {
 const nationalites = computed(() => nationalitesStore.getNationalites)
 const isLoading = computed(() => inscriptionStore.getIsLoading)
 const error = computed(() => inscriptionStore.getError)
-const successMessage = computed(() => inscriptionStore.getSuccessMessage)
+
+
+// État de la modale de succès
+const showSuccessModal = ref(false)
 
 // Méthodes
 const register = async () => {
@@ -206,10 +201,14 @@ const register = async () => {
     // Réinitialiser les validations du formulaire
     formRef.value.resetValidation()
 
-    // Redirection après 15 secondes
+    // Afficher la modale de succès
+    showSuccessModal.value = true
+
+    // Redirection après 5 secondes
     setTimeout(() => {
+      showSuccessModal.value = false
       router.push('/connection')
-    }, 15000)
+    }, 5000)
   }
 }
 

@@ -69,6 +69,10 @@ const routes = [
         path: '/connection',
         component: () => import('pages/LogginPage.vue'),
       },
+       {
+        path: '/footerUser',
+        component: () => import('src/components/FooterPage.vue'),
+      },
       {
         path: '/write',
         component: () => import('pages/EcrirePage.vue'),

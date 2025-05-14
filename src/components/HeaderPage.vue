@@ -1,8 +1,12 @@
 <template>
-  <q-header elevated class="bg-white text-black shadow-sm">
-    <q-toolbar>
-      <q-toolbar-title class="text-weight-bold text-h5">Fumbo</q-toolbar-title>
+  <q-header elevated class="bg-white text-black shadow-sm" style="height: 80px">
+    <q-toolbar class="q-px-lg">
+      <!-- Titre -->
+      <q-avatar size="100px" class="" style="margin-top: -15px;">
+        <img src="/img/fumbo_logo.png" style="background: none" />
+      </q-avatar>
       <q-space />
+
       <!-- Champ de recherche -->
       <q-input
         dense
@@ -11,6 +15,7 @@
         placeholder="Rechercher..."
         class="q-mr-md animate__animated animate__fadeInRight"
         v-model="searchQuery"
+        style="max-width: 150px; margin-top: 5px"
       >
         <template v-slot:append>
           <q-icon name="search" />
@@ -18,22 +23,23 @@
       </q-input>
 
       <!-- Liens de navigation -->
-      <div class="flex items-center gap-4">
+      <div class="flex items-center gap-4" style="margin-top: -10px;">
+        <q-btn flat label="Librairie" class="hover-underline-animation" to="/ecrire" />
         <q-btn flat label="Livres gratuit" class="hover-underline-animation" to="/ouvrage" />
-        <q-btn flat label="Ecrire" class="hover-underline-animation" to="/write" />
+        <q-btn flat label="Écrire" class="hover-underline-animation" to="/write" />
         <q-btn flat label="Publier" class="hover-underline-animation" to="/create-book" />
         <q-btn flat label="Raconter" class="hover-underline-animation" to="/raconter" />
-        <q-btn flat label="Ecouter" class="hover-underline-animation" to="/ecouter" />
+        <q-btn flat label="Écouter" class="hover-underline-animation" to="/ecouter" />
 
         <!-- Partie droite - Actions utilisateur -->
-        <div class="col-auto row items-center q-gutter-sm">
+        <div class="col-auto row items-center q-gutter-sm" style="margin-top:10px">
           <!-- Sélecteur de langue -->
           <LangSwitcher class="q-ml-md" />
-          <q-space ref="30px" />
+          <q-space />
+
           <!-- Bouton Notifications -->
           <q-btn flat round icon="notifications" class="notif">
             <q-badge floating color="red">3</q-badge>
-
             <q-menu anchor="bottom right" self="top right">
               <q-card style="width: 400px; max-width: 100vw">
                 <q-tabs
@@ -62,7 +68,7 @@
                         <strong>Véronique:</strong> Super histoire, on attend la suite avec
                         impatience, merci !!! 😊
                       </div>
-                      <div class="text-caption text-primary">Live la critique complète</div>
+                      <div class="text-caption text-primary">Lire la critique complète</div>
                     </div>
 
                     <q-separator spaced />
@@ -106,12 +112,12 @@
                     <q-img :src="user.image || '~assets/user-avatar.png'" />
                   </q-avatar>
                   <q-item-section>
-                    <q-item-label class="text-h8"
-                      >{{ user.username }} {{ user.prenom }}
+                    <q-item-label class="text-h8">
+                      {{ user.username }} {{ user.prenom }}
                     </q-item-label>
-                    <q-item-label caption>{{
-                      user.bio || 'Biographie non disponible'
-                    }}</q-item-label>
+                    <q-item-label caption>
+                      {{ user.bio || 'Biographie non disponible' }}
+                    </q-item-label>
                   </q-item-section>
                 </q-item>
 
@@ -125,6 +131,7 @@
                 </q-item>
 
                 <q-separator />
+
                 <q-item clickable v-ripple to="/parametre">
                   <q-item-section avatar>
                     <q-icon name="settings" />
@@ -138,7 +145,6 @@
                   <q-item-section avatar>
                     <q-icon name="logout" />
                   </q-item-section>
-
                   <q-item-section class="text-negative">Déconnexion</q-item-section>
                 </q-item>
               </q-list>
@@ -146,7 +152,6 @@
           </q-btn>
         </div>
       </div>
-      <q-separator spaced />
     </q-toolbar>
   </q-header>
 </template>
@@ -180,6 +185,7 @@ const logout = () => {
 <style scoped>
 /* Animation de soulignement au survol */
 .hover-underline-animation {
+  margin-top: 20px;
   position: relative;
 }
 

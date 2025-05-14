@@ -3,7 +3,9 @@
   <q-header v-if="!isInscriptionPage" elevated class="bg-white text-black shadow-lg q-py-md">
     <q-toolbar class="q-px-lg">
       <!-- Titre -->
-      <q-toolbar-title class="text-weight-bold ">Fumbo</q-toolbar-title>
+      <q-avatar size="100px" class="testimonial-avatar q-mb-md" style="background: none">
+        <img src="/img/fumbo_logo.png" style="background: none" />
+      </q-avatar>
 
       <!-- Espace flexible -->
       <q-space />
@@ -14,7 +16,7 @@
         placeholder="Rechercher..."
         v-model="searchQuery"
         class="q-mr-md"
-        style="max-width: 200px;"
+        style="max-width: 200px"
       >
         <template v-slot:append>
           <q-icon name="search" />
@@ -36,19 +38,19 @@
           flat
           label="Ouvrages"
           class="hover-underline-animation text-weight-bold"
-          to="/ouvrage"
+          to="/connection"
         />
         <q-btn
           flat
           label="Publier"
           class="hover-underline-animation text-weight-bold"
-          to="/Enregistrer"
+          to="/connection"
         />
         <q-btn
           flat
           label="Ecrire"
           class="hover-underline-animation text-weight-bold"
-          to="/enregistrer"
+          to="/connection"
         />
 
         <!-- Sélecteur de langue -->

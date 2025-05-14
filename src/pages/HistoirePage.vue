@@ -1,6 +1,6 @@
 <template>
   <q-layout view="hHh lpR fFf">
-       <MainNavbar />
+      <HeaderPage />
     <q-page-container>
       <div class="q-pa-md">
         <!-- Section Catégories/Genres -->
@@ -142,15 +142,15 @@
         </section>
       </div>
     </q-page-container>
-    <InfoSection />
+
   </q-layout>
 </template>
 
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import MainNavbar from 'src/components/MainNavbar.vue'
-import InfoSection from 'src/components/InfoSection.vue'
+import HeaderPage from 'src/components/HeaderPage.vue'
+
 
 const router = useRouter()
 
