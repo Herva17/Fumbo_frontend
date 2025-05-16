@@ -51,7 +51,7 @@
             bg-color="grey-2"
           />
           <q-input
-            v-model="book.id_user"
+            v-model="user.id"
             label="Auteur (ID) *"
             dense
             outlined
@@ -225,17 +225,63 @@
 </template>
 
 <script setup>
-
 import { ref, onMounted } from 'vue'
 import HeaderPage from 'src/components/HeaderPage.vue'
 import { useQuasar } from 'quasar'
+import { useCategorieStore } from 'src/stores/categorie' // <-- Import du store
 
 const $q = useQuasar()
+
+const user = ref({
+  id:'',
+  username: '',
+  prenom: '',
+  image: '',
+  bio: '',
+})
+
+onMounted(() => {
+  const storedUser = localStorage.getItem('user')
+  if (storedUser) {
+    user.value = JSON.parse(storedUser)
+  }
+})
+
+// Store Pinia pour les catégories
+const categorieStore = useCategorieStore()
+const categories = ref([])
+onMounted(async () => {
+  await categorieStore.fetchCategories()
+  console.log('categories API:', categorieStore.categories)
+
+  // On récupère le tableau dans .response
+  let rawCategories = categorieStore.categories?.response
+  if (!Array.isArray(rawCategories)) {
+    rawCategories = []
+  }
+
+  categories.value = rawCategories.map(cat => ({
+    label: cat.nom_categorie || cat.label || cat.nom || 'Catégorie',
+    value: cat.id_categorie || cat.value || cat.id
+  }))
+})
+
+  // Récupérer l'utilisateur pour l'auteur
+  const  storedUser = localStorage.getItem('user')
+  if (storedUser) {
+    try {
+      const userObj = JSON.parse(storedUser)
+      book.value.id_auteur = userObj.id_user || userObj.id || ''
+    } catch (error) {
+      console.error('Erreur lors de la récupération des données utilisateur :', error)
+    }
+  }
+
 
 const book = ref({
   id_ouvrage: null,
   titre_ouvrage: '',
-  id_auteur: '', // L'ID de l'utilisateur connecté sera assigné ici
+  id_auteur: '',
   id_categorie: null,
   annee_publication: '',
   image: '',
@@ -248,45 +294,10 @@ const book = ref({
   tags: [],
   datePub: '',
 })
-onMounted(() => {
-  const storedUser = localStorage.getItem('user')
-  if (storedUser) {
-    try {
-      const user = JSON.parse(storedUser)
-      console.log('Utilisateur récupéré depuis localStorage :', user) // Vérifiez ici
-      book.value.id_auteur = user.id_user || '' // Assigner l'ID de l'utilisateur à id_auteur
-    } catch (error) {
-      console.error('Erreur lors de la récupération des données utilisateur :', error)
-    }
-  }
-})
-const categories = [
-  { label: 'Roman', value: 'novel' },
-  { label: 'Science-Fiction', value: 'sci-fi' },
-  { label: 'Fantasy', value: 'fantasy' },
-  { label: 'Biographie', value: 'biography' },
-  { label: 'Poésie', value: 'poetry' },
-  { label: 'Thriller', value: 'thriller' },
-  { label: 'Développement personnel', value: 'self-help' },
-  { label: 'Autres', value: 'other' },
-]
 
 const coverFile = ref(null)
 const bookFile = ref(null)
 const loading = ref(false)
-
-onMounted(() => {
-  // Récupérer les informations de l'utilisateur connecté depuis le localStorage
-  const storedUser = localStorage.getItem('user')
-  if (storedUser) {
-    try {
-      const user = JSON.parse(storedUser)
-      book.value.id_auteur = user.id || '' // Assigner l'ID de l'utilisateur à id_auteur
-    } catch (error) {
-      console.error('Erreur lors de la récupération des données utilisateur :', error)
-    }
-  }
-})
 
 const createTag = (val, done) => {
   if (val.length > 0) {
@@ -304,7 +315,7 @@ const resetForm = () => {
     book.value = {
       id_ouvrage: null,
       titre_ouvrage: '',
-      id_auteur: '', // Réinitialiser l'ID de l'auteur
+      id_auteur: '',
       id_categorie: null,
       annee_publication: '',
       image: '',
@@ -324,8 +335,8 @@ const resetForm = () => {
     const storedUser = localStorage.getItem('user')
     if (storedUser) {
       try {
-        const user = JSON.parse(storedUser)
-        book.value.id_auteur = user.id || ''
+        const userObj = JSON.parse(storedUser)
+        book.value.id_auteur = userObj.id_user || userObj.id || ''
       } catch (error) {
         console.error('Erreur lors de la récupération des données utilisateur :', error)
       }
@@ -360,7 +371,6 @@ const submitForm = () => {
   }, 2000)
 }
 </script>
-
 <style scoped>
 .dashboard-page {
   padding: 0px;

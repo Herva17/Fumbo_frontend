@@ -66,40 +66,46 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import BannerSection from 'src/components/BannerSection.vue';
-import HeaderPage from 'src/components/HeaderPage.vue';
-import FooterPage from  'src/components/FooterPage.vue';
+import { ref, onMounted } from 'vue'
+import BannerSection from 'src/components/BannerSection.vue'
+import HeaderPage from 'src/components/HeaderPage.vue'
+import FooterPage from 'src/components/FooterPage.vue'
+import { useCategorieStore } from 'src/stores/categorie' // <-- Import du store
 
-
-
-// Définition de la propriété searchQuery
-const filter = ref('Tous');
-const sort = ref('recent');
-const filterOptions = ['Tous', 'Fantasy', 'Aventure', 'Romance', 'Drame', 'Horreur', 'Mystère'];
+const filter = ref('Tous')
+const sort = ref('recent')
+const filterOptions = ref(['Tous']) // On commence par "Tous"
 
 const user = ref({
   username: '',
-  prenom: '',
-  image: '',
-  bio: '',
-});
+})
 
-onMounted(() => {
-  const storedUser = localStorage.getItem('user');
+// Store Pinia pour les catégories
+const categorieStore = useCategorieStore()
+
+onMounted(async () => {
+  // Récupération utilisateur
+  const storedUser = localStorage.getItem('user')
   if (storedUser) {
     try {
-      user.value = JSON.parse(storedUser); // Récupère les informations de l'utilisateur depuis le localStorage
+      user.value = JSON.parse(storedUser)
     } catch (error) {
-      console.error('Erreur lors de la récupération des données utilisateur :', error);
+      console.error('Erreur lors de la récupération des données utilisateur :', error)
     }
   }
-});
 
-
-
-
-
+  // Récupération des catégories
+  await categorieStore.fetchCategories()
+  let rawCategories = categorieStore.categories?.response
+  if (!Array.isArray(rawCategories)) {
+    rawCategories = []
+  }
+  // Ajout dynamique des catégories dans filterOptions
+  filterOptions.value = [
+    'Tous',
+    ...rawCategories.map(cat => cat.nom_categorie || cat.label || cat.nom || 'Catégorie')
+  ]
+})
 </script>
 
 <style scoped>
