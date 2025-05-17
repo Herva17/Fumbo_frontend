@@ -49,7 +49,11 @@
         <!-- Section 2 : Hébergement -->
         <section class="mb-8">
           <h2>
-            <q-icon name="server" class="mr-2" />
+            <q-icon
+              name="fas fa-
+            server"
+              class="mr-2"
+            />
             Hébergement
           </h2>
           <ul>
