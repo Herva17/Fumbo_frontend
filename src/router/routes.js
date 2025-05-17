@@ -93,6 +93,18 @@ const routes = [
         path: '/Ml',
         component: () => import('pages/MentionsL.vue'),
       },
+      {
+        path: '/Perso',
+        component: () => import('pages/TeamGroup.vue'),
+      },
+      {
+        path: '/Cont',
+        component: () => import('pages/ContactSection.vue'),
+      },
+      {
+        path: '/Rec',
+        component: () => import('pages/ConseilsView.vue'),
+      },
     ],
   },
 

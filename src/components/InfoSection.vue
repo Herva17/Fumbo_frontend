@@ -2,35 +2,53 @@
   <section class="info-section">
     <div class="column">
       <h3 class="section-title">À PROPOS DE <span class="highlight">FUMBO</span></h3>
-      <ul>
-        <li><q-icon name="person" class="icon" /> Personnel</li>
-        <span>
-          <router-link to="/Po" class="flex items-center space-x-2 mt-4">
-            <li><q-icon name="shield" class="icon" /> Politique de confidentialité</li>
+      <ul class="link-list">
+        <li>
+          <router-link to="/Perso" class="link">
+            <q-icon name="fas fa-users" class="icon" />
+            Personnel
           </router-link>
-        </span>
-        <span>
-          <router-link to="Ml" class="flex items-center space-x-2 mt-4">
-            <li><q-icon name="gavel" class="icon" /> Code d’éthique et de conduite</li>
+        </li>
+        <li>
+          <router-link to="/Po" class="link">
+            <q-icon name="shield" class="icon" />
+            Politique de confidentialité
           </router-link>
-        </span>
+        </li>
+        <li>
+          <router-link to="/Ml" class="link">
+            <q-icon name="gavel" class="icon" />
+            Code d’éthique et de conduite
+          </router-link>
+        </li>
       </ul>
     </div>
     <div class="column">
       <h3 class="section-title">PARTAGEZ VOTRE <span class="highlight">HISTOIRE</span></h3>
-      <ul>
+      <ul class="link-list">
         <li>
-          <q-icon name="lightbulb" class="icon" /> Conseils et astuces pour partager une histoire
+          <router-link to="/Rec" class="link">
+            <q-icon name="fas fa-lightbulb" class="icon" />
+            Astuces et recommandations pour la diffusion de contenu
+          </router-link>
         </li>
-        <li><q-icon name="send" class="icon" /> Soumettre vos données personnelles</li>
+        <li>
+          <router-link to="/Cont" class="link">
+            <q-icon name="fas fa-id-card" class="icon" />
+            Fournir vos informations personnelles
+          </router-link>
+        </li>
       </ul>
     </div>
     <div class="column contact">
       <h3 class="section-title">FUMBO</h3>
-      <p class="address">
-        103, av Carmel, Q. Katindo <br />
-        Goma, RDC
-      </p>
+      <div class="address-box">
+        <p class="address">
+          103, av Carmel, Q. Katindo <br />
+          Goma, RDC
+        </p>
+      </div>
+
       <div class="social-icons">
         <q-btn flat round icon="fab fa-facebook" class="social-btn facebook" />
         <q-btn flat round icon="fab fa-instagram" class="social-btn instagram" />
@@ -44,44 +62,77 @@
 <style scoped>
 .info-section {
   display: flex;
-  justify-content: space-around;
-  background: #1a1a1a;
-  color: #fff;
+  flex-wrap: wrap;
+  gap: 40px;
   padding: 40px 20px;
-  border-radius: 10px;
-  margin-top: 50px;
+  background-color: #f9f9f9;
+  justify-content: space-between;
 }
 .column {
-  flex: 1;
-  max-width: 300px;
+  flex: 1 1 300px;
+  min-width: 280px;
 }
 .section-title {
-  font-size: 1.2rem;
-  margin-bottom: 15px;
-  text-transform: uppercase;
-  font-weight: bold;
+  font-size: 1.5rem;
+  color: white;
+  margin-bottom: 20px;
 }
 .highlight {
-  color: #ffcc00;
+  color: #007bff;
+  font-weight: bold;
 }
-ul {
+.link-list {
   list-style: none;
   padding: 0;
+  margin: 0;
 }
-ul li {
+
+.link-list li {
+  margin-bottom: 15px;
+}
+
+.link {
   display: flex;
   align-items: center;
-  margin-bottom: 10px;
-  font-size: 0.9rem;
+  text-decoration: none;
+  color: #444;
+  font-size: 1rem;
+  transition: color 0.3s ease;
+  font-weight: bold;
 }
+
+.link:hover {
+  color: #007bff;
+}
+
 .icon {
   margin-right: 8px;
-  color: #ffcc00;
+  font-size: 1.2rem;
+  color: #007bff;
 }
+
 .contact .address {
   font-size: 0.9rem;
   margin-bottom: 15px;
+  font-weight: bold;
 }
+.address-box {
+  background-color: #f0f4f8;
+  border-left: 4px solid #007BFF;
+  border-radius: 8px;
+  padding: 12px 16px;
+  max-width: 300px;
+  font-family: 'Segoe UI', sans-serif;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.address {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #333;
+  line-height: 1.5;
+}
+
 .social-icons {
   display: flex;
   gap: 10px;
