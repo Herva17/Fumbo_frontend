@@ -19,23 +19,23 @@
         <!-- Titre principal -->
         <h1 class="text-3xl font-semibold text-center text-blue-900 mb-8">
           <q-icon name="shield" class="mr-2" />
-          Politique de Confidentialité
+          {{ $t('pol.title1') }}
         </h1>
 
         <!-- Section 1 : Collecte des informations -->
         <section class="mb-8">
           <h2 class="text-xl font-medium text-blue-900 mb-4">
             <q-icon name="database" class="mr-2" />
-            Collecte des informations
+            {{ $t('pol.title2') }}
           </h2>
           <p class="text-gray-700 mb-4">
-            Nous collectons différentes informations personnelles lorsque vous utilisez notre site.
+            {{ $t('pol.De1') }}
           </p>
           <ul class="list-disc pl-6 text-gray-700 space-y-2">
-            <li><i class="fas fa-id-card mr-2"></i> Nom et prénom</li>
-            <li><i class="fas fa-envelope mr-2"></i> Adresse e-mail</li>
-            <li><i class="fas fa-phone mr-2"></i> Numéro de téléphone</li>
-            <li><i class="fas fa-map-marker-alt mr-2"></i> Adresse postale</li>
+            <li><i class="fas fa-id-card mr-2"></i> {{ $t('pol.de1') }}</li>
+            <li><i class="fas fa-envelope mr-2"></i> {{ $t('pol.de2') }}</li>
+            <li><i class="fas fa-phone mr-2"></i> {{ $t('pol.de3') }}</li>
+            <li><i class="fas fa-map-marker-alt mr-2"></i> {{ $t('pol.de4') }}</li>
           </ul>
         </section>
 
@@ -43,11 +43,10 @@
         <section class="mb-8">
           <h2 class="text-xl font-medium text-green-700 mb-4">
             <q-icon name="storage" class="mr-2" />
-            Utilisation des données
+            {{ $t('pol.title3') }}
           </h2>
           <p class="text-gray-700">
-            Vos informations sont utilisées pour améliorer nos services, personnaliser votre
-            expérience et assurer la sécurité du site.
+            {{ $t('pol.De2') }}
           </p>
         </section>
 
@@ -55,11 +54,10 @@
         <section class="mb-8">
           <h2 class="text-xl font-medium text-purple-700 mb-4">
             <q-icon name="share" class="mr-2" />
-            Partage des données
+            {{ $t('pol.title4') }}
           </h2>
           <p class="text-gray-700">
-            Nous ne vendons ni ne partageons vos données personnelles avec des tiers sans votre
-            consentement, sauf en cas d'obligation légale.
+            {{ $t('pol.De3') }}
           </p>
         </section>
 
@@ -67,11 +65,10 @@
         <section class="mb-8">
           <h2 class="text-xl font-medium text-red-700 mb-4">
             <q-icon name="lock" class="mr-2" />
-            Sécurité des données
+            {{ $t('pol.title5') }}
           </h2>
           <p class="text-gray-700">
-            Nous mettons en œuvre des mesures de sécurité pour protéger vos informations contre
-            l'accès non autorisé.
+            {{ $t('pol.De4') }}
           </p>
         </section>
 
@@ -79,13 +76,12 @@
         <section>
           <h2 class="text-xl font-medium text-blue-900 mb-4">
             <q-icon name="balance" class="mr-2" />
-            Vos droits
+            {{ $t('pol.title6') }}
           </h2>
           <p class="text-gray-700">
-            Conformément au RGPD, vous pouvez demander l'accès, la modification ou la suppression de
-            vos données personnelles en nous contactant à l'adresse suivante :
+            {{ $t('pol.De5') }}
             <a href="mailto:contact@entreprise.com" class="text-blue-600 hover:text-blue-800">
-              contact@entreprise.com</a
+              {{ $t('pol.De6') }}</a
             >.
           </p>
         </section>

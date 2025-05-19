@@ -1,0 +1,53 @@
+//import frFR from './fr-FR'
+//import swSW from './sw-SW'
+
+export default {
+  info: {
+    title1: 'KUHUSU',
+    title2: 'FUMBO',
+    Description1: ' Wafanyakazi',
+    Description2: ' Sera ya Faragha',
+    Description3: ' Kanuni za Maadili na Mwenendo',
+    title3: 'SHIRIKI',
+    title4: 'HADITHI YAKO',
+    Description4: ' Vidokezo na mapendekezo ya kushiriki maudhui',
+    Description5: ' Toa taarifa zako binafsi',
+    title5: 'FUMBO',
+    Description6: ' 103, Barabara ya Carmel, Mtaa wa Katindo',
+    Description7: ' Goma, Jamhuri ya Kidemokrasia ya Kongo',
+  },
+  personnel: {
+    title1: 'Timu Yetu',
+    Dsc1: ' Watu wenye vipaji wanaochangia mafanikio yetu.',
+    title2: 'Jiunge na Timu Yetu',
+    Dsc2: ' Jina Kamili',
+    Dsc3: ' Barua Pepe',
+    Dsc4: ' Eneo',
+    Dsc5: ' Chagua eneo',
+    Dsc6: 'Maendeleo',
+    Dsc7: 'Ubunifu / UI-UX',
+    Dsc8: 'Masoko',
+    Dsc9: 'Mengineyo',
+    Dsc10: ' Eleza eneo kwa undani',
+    Dsc11: ' Tuma Maombi',
+  },
+  pol: {
+  title1: 'Sera ya Faragha',
+  title2: 'Ukusanyaji wa Taarifa',
+  De1: ' Tunakusanya taarifa mbalimbali binafsi unapoutumia tovuti yetu.',
+  de1: ' Jina Kamili',
+  de2: ' Anwani ya Barua Pepe',
+  de3: ' Nambari ya Simu',
+  de4: ' Anwani ya Posta',
+  title3: 'Matumizi ya Taarifa',
+  De2: ' Taarifa zako zinatumiwa kuboresha huduma zetu, kubinafsisha uzoefu wako na kuhakikisha usalama wa tovuti.',
+  title4: 'Ushiriki wa Taarifa',
+  De3: 'Hatuuzi wala kushiriki taarifa zako binafsi na watu wengine bila idhini yako, isipokuwa pale inapolazimishwa kisheria.',
+  title5: 'Usalama wa Taarifa',
+  De4: ' Tunachukua hatua stahiki za kiusalama kulinda taarifa zako dhidi ya upatikanaji usioidhinishwa.',
+  title6: 'Haki Zako',
+  De5: 'Kulingana na GDPR (Kanuni ya Jumla ya Ulinzi wa Data), unaweza kuomba kufikia, kurekebisha au kufuta taarifa zako binafsi kwa kuwasiliana nasi kupitia anwani hii:',
+  De6: 'info@hibaigle.net.',
+},
+
+}
