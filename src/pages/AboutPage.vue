@@ -101,6 +101,7 @@
         </div>
       </div>
     </div>
+    
      <InfoSection />
   </q-layout>
 </template>

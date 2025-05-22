@@ -1,6 +1,6 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import { Quasar } from 'quasar'
+import { Quasar, Notify, Dialog } from 'quasar'
 import '@quasar/extras/animate/fadeIn.css'
 import '@quasar/extras/mdi-v6/mdi-v6.css'
 import App from './App.vue'
@@ -15,10 +15,10 @@ import router from './router'
 const app = createApp(App)
 
 // Configurez Quasar
-app.use(createPinia)
+app.use(createPinia())
 app.use(router)
 app.use(Quasar, {
-  plugins: {}, // Ajoutez les plugins Quasar nécessaires
+  plugins: { Notify, Dialog }, // <-- Dialog bien ajouté ici
   config: {
     brand: {
       primary: '#1976d2',

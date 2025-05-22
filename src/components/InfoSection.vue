@@ -26,7 +26,9 @@
       </ul>
     </div>
     <div class="column">
-      <h3 class="section-title">{{ $t('info.title3') }} <span class="highlight">{{ $t('info.title4') }}</span></h3>
+      <h3 class="section-title">
+        {{ $t('info.title3') }} <span class="highlight">{{ $t('info.title4') }}</span>
+      </h3>
       <ul class="link-list">
         <li>
           <router-link to="/Rec" class="link">
@@ -37,17 +39,17 @@
         <li>
           <router-link to="/Cont" class="link">
             <q-icon name="fas fa-id-card" class="icon" />
-           {{ $t('info.Description5') }}
+            {{ $t('info.Description5') }}
           </router-link>
         </li>
       </ul>
     </div>
     <div class="column contact">
-      <h3 class="section-title">{{ $t('info.title5') }} </h3>
+      <h3 class="section-title">{{ $t('info.title5') }}</h3>
       <div class="address-box">
         <p class="address">
           {{ $t('info.Description6') }} <br />
-         {{ $t('info.Description7') }}
+          {{ $t('info.Description7') }}
         </p>
       </div>
 
@@ -71,7 +73,7 @@
   flex-wrap: wrap;
   gap: 40px;
   padding: 40px 20px;
-  background-color: #f9f9f9;
+  background-color: #111010;
   justify-content: space-between;
 }
 .column {
