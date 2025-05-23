@@ -21,7 +21,7 @@
         v-model="sort"
         toggle-color="primary"
         flat
-        :options="[ 
+        :options="[
           { label: 'Récent', value: 'recent' },
           { label: 'Populaire', value: 'popular' },
           { label: 'Mieux notés', value: 'top' }
@@ -31,34 +31,55 @@
 
     <!-- Liste des histoires -->
     <div class="stories-list">
-      <!-- Exemple d'histoire -->
-      <q-card class="story-card q-mb-lg">
-        <q-card-section horizontal>
-          <q-img class="col-3" src="/img/wild-sky.jpg" alt="Au Clair de Lune" />
-          <q-card-section>
-            <div class="text-h6">Au Clair de Lune, Tome 1 : La Lune Vengeresse</div>
-            <div class="text-subtitle2 q-mb-sm">★★★★☆</div>
-            <p class="story-description">
-              Je m'appelle Louva Wild, une Loup-Garou de rang Delta qui mène une vie simple et
-              tranquille jusqu'à ce qu'IL arrive et chamboule absolument tout...
-            </p>
-            <div class="row q-mt-md">
-              <q-chip v-for="tag in ['Fantasy', 'Aventure', 'Loup-Garou']" :key="tag" dense>
-                {{ tag }}
-              </q-chip>
-            </div>
-            <div class="row items-center q-mt-sm">
-              <div class="col">
-                <span class="text-caption">Par Laura B • Terminé • 54 chapitres</span>
-              </div>
-              <div class="col-auto">
-                <q-btn flat color="primary" label="Lire" />
-              </div>
-            </div>
-          </q-card-section>
-        </q-card-section>
-      </q-card>
-    </div>
+  <q-card
+    v-for="ouvrage in ouvrageStore.ouvrages"
+    :key="ouvrage.id_ouvrage"
+    class="story-card q-mb-lg"
+  >
+    <q-card-section horizontal>
+      <q-img
+        class="col-3"
+        :src="getFullUrl(ouvrage.ouvrage_image)"
+        :alt="ouvrage.titre_ouvrage"
+      />
+      <q-card-section>
+        <div class="text-h6">{{ ouvrage.titre_ouvrage }}</div>
+        <div class="text-subtitle2 q-mb-xs">
+          Par {{ ouvrage.username }} {{ ouvrage.prenom }}
+          <q-chip dense>{{ ouvrage.nom_nationalite }}</q-chip>
+        </div>
+        <div class="q-mb-xs">
+          <q-chip dense>{{ ouvrage.nom_categorie }}</q-chip>
+        </div>
+        <p class="story-description">
+          {{ ouvrage.resume }}
+        </p>
+        <div class="row items-center q-mt-sm">
+          <div class="col">
+            <span class="text-caption">
+              Année : {{ ouvrage.annee_publication }} • {{ ouvrage.Nb_pages }} pages
+            </span>
+          </div>
+          <div class="col-auto">
+            <q-btn
+              flat
+              color="primary"
+              label="Lire"
+              :href="getFullUrl(ouvrage.fichier_livre)"
+              target="_blank"
+            />
+          </div>
+        </div>
+        <!-- Boutons Like, Commenter, Partager -->
+        <div class="row q-mt-sm q-gutter-sm">
+          <q-btn flat round icon="favorite_border" color="pink" @click="onLike(ouvrage)" />
+          <q-btn flat round icon="chat_bubble_outline" color="primary" @click="onComment(ouvrage)" />
+          <q-btn flat round icon="share" color="teal" @click="onShare(ouvrage)" />
+        </div>
+      </q-card-section>
+    </q-card-section>
+  </q-card>
+</div>
 
     <!-- Footer -->
     <FooterPage />
@@ -70,18 +91,29 @@ import { ref, onMounted } from 'vue'
 import BannerSection from 'src/components/BannerSection.vue'
 import HeaderPage from 'src/components/HeaderPage.vue'
 import FooterPage from 'src/components/FooterPage.vue'
-import { useCategorieStore } from 'src/stores/categorie' // <-- Import du store
+import { useCategorieStore } from 'src/stores/categorie'
+import { useAfficherOuvrageStore } from 'src/stores/AfficherOuvrage'
 
 const filter = ref('Tous')
 const sort = ref('recent')
-const filterOptions = ref(['Tous']) // On commence par "Tous"
+const filterOptions = ref(['Tous'])
 
 const user = ref({
   username: '',
 })
 
-// Store Pinia pour les catégories
 const categorieStore = useCategorieStore()
+const ouvrageStore = useAfficherOuvrageStore()
+
+// Chemin de base pour les fichiers/images (adapte si besoin)
+const BASE_URL = 'http://localhost/'
+
+// Fonction utilitaire pour corriger les chemins relatifs
+function getFullUrl(path) {
+  if (!path) return '/img/default-book.jpg'
+  if (path.startsWith('http')) return path
+  return BASE_URL + path.replace(/^(\.\.\/)+/, '')
+}
 
 onMounted(async () => {
   // Récupération utilisateur
@@ -100,12 +132,26 @@ onMounted(async () => {
   if (!Array.isArray(rawCategories)) {
     rawCategories = []
   }
-  // Ajout dynamique des catégories dans filterOptions
   filterOptions.value = [
     'Tous',
     ...rawCategories.map(cat => cat.nom_categorie || cat.label || cat.nom || 'Catégorie')
   ]
+
+  // Récupération des ouvrages
+  await ouvrageStore.fetchOuvrages()
 })
+function onLike(ouvrage) {
+  // Ajoute ici la logique pour aimer
+  console.log('Like', ouvrage.id_ouvrage)
+}
+function onComment(ouvrage) {
+  // Ajoute ici la logique pour commenter
+  console.log('Comment', ouvrage.id_ouvrage)
+}
+function onShare(ouvrage) {
+  // Ajoute ici la logique pour partager
+  console.log('Share', ouvrage.id_ouvrage)
+}
 </script>
 
 <style scoped>
@@ -115,6 +161,9 @@ onMounted(async () => {
   padding-right: 5px;
   max-width: 1500px;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 .q-avatar img {
@@ -139,17 +188,11 @@ onMounted(async () => {
   text-overflow: ellipsis;
 }
 
-.dashboard-page {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh; /* Assure que la page occupe toute la hauteur de l'écran */
-}
-
 .stories-list {
-  flex: 1; /* Permet au contenu principal de prendre tout l'espace disponible */
+  flex: 1;
 }
 
 .q-footer {
-  margin-top: auto; /* Positionne le footer en bas de la page */
+  margin-top: auto;
 }
 </style>

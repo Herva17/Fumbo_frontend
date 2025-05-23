@@ -303,6 +303,20 @@ const resetForm = () => {
     bookFile.value = null
   })
 }
+// ...existing code...
+
+// Fonction pour échapper les caractères HTML
+function escapeHtml(text) {
+  if (!text) return ''
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/'/g, '&#039;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+}
+
+// ...existing code...
 
 const submitForm = async () => {
   if (
@@ -324,13 +338,14 @@ const submitForm = async () => {
 
   const formData = new FormData()
   formData.append('id_ouvrage', book.value.id_ouvrage)
-  formData.append('titre_ouvrage', book.value.titre_ouvrage)
-  formData.append('id_user', book.value.id_user) // <-- le bon nom ici
+  // On échappe ici les champs texte
+  formData.append('titre_ouvrage', escapeHtml(book.value.titre_ouvrage))
+  formData.append('id_user', book.value.id_user)
   formData.append('id_categorie', book.value.id_categorie)
   formData.append('annee_publication', book.value.annee_publication)
   formData.append('langue', book.value.langue)
   formData.append('isbn', book.value.isbn)
-  formData.append('resume', book.value.resume)
+  formData.append('resume', escapeHtml(book.value.resume))
   formData.append('format', book.value.format)
   formData.append('Nb_pages', book.value.Nb_pages)
   formData.append('tags', JSON.stringify(book.value.tags))
@@ -355,6 +370,8 @@ const submitForm = async () => {
     resetForm()
   }
 }
+
+// ...existing code...
 </script>
 
 <style scoped>

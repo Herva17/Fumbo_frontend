@@ -7,15 +7,7 @@
       </q-avatar>
       <q-space />
 
-      <!-- Menu hamburger sur mobile UNIQUEMENT -->
-      <q-btn
-        flat
-        dense
-        round
-        icon="menu"
-        class="togglebar-mobile"
-        @click="drawer = true"
-      />
+
 
       <!-- Champ de recherche (masqué sur mobile) -->
       <q-input
@@ -33,7 +25,7 @@
       </q-input>
 
       <!-- Liens de navigation (masqués sur mobile) -->
-      <div class="nav-btns flex items-center gap-4 q-xs-none q-sm-none" style="margin-top: -10px">
+      <div class="nav-btns flex items-center gap-4 q-xs-none q-sm-none" style="margin-top: 10PX">
         <q-btn flat label="Librairie" class="hover-underline-animation" to="/ecrire" />
         <q-btn flat label="Livres gratuit" class="hover-underline-animation" to="/ouvrage" />
         <q-btn flat label="Écrire" class="hover-underline-animation" to="/write" />
@@ -42,7 +34,7 @@
         <q-btn flat label="Écouter" class="hover-underline-animation" to="/ecouter" />
 
         <!-- Partie droite - Actions utilisateur -->
-        <div class="col-auto row items-center q-gutter-sm right-actions" style="margin-top: 10px">
+        <div class="col-auto row items-center q-gutter-sm right-actions" style="">
           <LangSwitcher class="q-ml-md" />
           <q-space />
 
@@ -101,12 +93,15 @@
           </q-btn>
 
           <!-- Menu Profil -->
-          <q-btn flat round icon="account_circle" class="text-black">
+          <q-btn flat round>
+            <q-avatar size="32px">
+              <img :src="getUserImage(user.image)" alt="Profil" />
+            </q-avatar>
             <q-menu>
               <q-list style="min-width: 100px">
                 <q-item>
                   <q-avatar size="30px" class="q-mr-md">
-                    <q-img :src="user.image || '~assets/user-avatar.png'" />
+                    <img :src="getUserImage(user.image)" />
                   </q-avatar>
                   <q-item-section>
                     <q-item-label class="text-h8">
@@ -203,6 +198,15 @@ const user = ref({
   bio: '',
 })
 
+// Adapter ici selon l'emplacement réel de tes images utilisateurs
+const BASE_URL = 'http://localhost/' // Mets l'URL de base de ton serveur
+
+function getUserImage(path) {
+  if (!path) return '/img/user-avatar.png'
+  if (path.startsWith('http')) return path
+  return BASE_URL + path.replace(/^(\.\.\/|\.\/)+/, '')
+}
+
 onMounted(() => {
   const storedUser = localStorage.getItem('user')
   if (storedUser) {
@@ -215,102 +219,3 @@ const logout = () => {
   window.location.reload()
 }
 </script>
-
-<style scoped>
-.header-toolbar {
-  flex-wrap: wrap;
-  min-height: 80px;
-}
-
-.logo-avatar {
-  margin-top: -10px;
-}
-
-.nav-btns {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px;
-}
-
-.right-actions {
-  margin-top: 10px;
-}
-
-.search-input {
-  min-width: 120px;
-  width: 100%;
-  max-width: 180px;
-}
-
-/* Responsive styles */
-@media (max-width: 1024px) {
-  .header-toolbar {
-    flex-direction: column;
-    align-items: stretch;
-    min-height: unset;
-    padding-left: 8px;
-    padding-right: 8px;
-  }
-  .nav-btns {
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    gap: 8px;
-    margin-top: 8px;
-  }
-  .search-input {
-    max-width: 100%;
-    margin: 8px 0;
-  }
-}
-
-@media (max-width: 600px) {
-  .header-toolbar {
-    flex-direction: row;
-    align-items: center;
-    padding: 0 4px;
-  }
-  .logo-avatar {
-    margin: 0 0 0 0;
-    display: block;
-  }
-  .nav-btns {
-    display: none !important;
-  }
-  .search-input {
-    display: none !important;
-  }
-}
-
-/* Animation de soulignement au survol */
-.hover-underline-animation {
-  margin-top: 20px;
-  position: relative;
-}
-
-.hover-underline-animation::after {
-  content: '';
-  position: absolute;
-  width: 100%;
-  transform: scaleX(0);
-  height: 2px;
-  bottom: 0;
-  left: 0;
-  background-color: currentColor;
-  transform-origin: bottom right;
-  transition: transform 0.25s ease-out;
-}
-
-.hover-underline-animation:hover::after {
-  transform: scaleX(1);
-  transform-origin: bottom left;
-}
-.togglebar-mobile {
-  display: none;
-}
-@media (max-width: 600px) {
-  .togglebar-mobile {
-    display: inline-flex !important;
-  }
-}
-</style>
