@@ -7,8 +7,12 @@
       </q-avatar>
       <q-space />
 
+<<<<<<< HEAD
       <!-- Menu hamburger sur mobile UNIQUEMENT -->
       <q-btn flat dense round icon="menu" class="togglebar-mobile" @click="drawer = true" />
+=======
+
+>>>>>>> 11d82422a5421e0380bc628ce597865622d999e0
 
       <!-- Champ de recherche (masqué sur mobile) -->
       <q-input
@@ -26,7 +30,12 @@
       </q-input>
 
       <!-- Liens de navigation (masqués sur mobile) -->
+<<<<<<< HEAD
       <div class="nav-btns flex items-center gap-4 q-xs-none q-sm-none" style="margin-top: -10px">
+=======
+      <div class="nav-btns flex items-center gap-4 q-xs-none q-sm-none" style="margin-top: 10PX">
+        <q-btn flat label="Librairie" class="hover-underline-animation" to="/ecrire" />
+>>>>>>> 11d82422a5421e0380bc628ce597865622d999e0
         <q-btn flat label="Livres gratuit" class="hover-underline-animation" to="/ouvrage" />
         <q-btn flat label="Écrire" class="hover-underline-animation" to="/write" />
         <q-btn flat label="Publier" class="hover-underline-animation" to="/create-book" />
@@ -34,7 +43,7 @@
         <q-btn flat label="Écouter" class="hover-underline-animation" to="/ecouter" />
 
         <!-- Partie droite - Actions utilisateur -->
-        <div class="col-auto row items-center q-gutter-sm right-actions" style="margin-top: 10px">
+        <div class="col-auto row items-center q-gutter-sm right-actions" style="">
           <LangSwitcher class="q-ml-md" />
           <q-space />
 
@@ -94,12 +103,15 @@
           </q-btn>
 
           <!-- Menu Profil -->
-          <q-btn flat round icon="account_circle" class="text-black">
+          <q-btn flat round>
+            <q-avatar size="32px">
+              <img :src="getUserImage(user.image)" alt="Profil" />
+            </q-avatar>
             <q-menu>
               <q-list style="min-width: 100px">
                 <q-item>
                   <q-avatar size="30px" class="q-mr-md">
-                    <q-img :src="user.image || '~assets/user-avatar.png'" />
+                    <img :src="getUserImage(user.image)" />
                   </q-avatar>
                   <q-item-section>
                     <q-item-label class="text-h8">
@@ -196,6 +208,15 @@ const user = ref({
   bio: '',
 })
 
+// Adapter ici selon l'emplacement réel de tes images utilisateurs
+const BASE_URL = 'http://localhost/' // Mets l'URL de base de ton serveur
+
+function getUserImage(path) {
+  if (!path) return '/img/user-avatar.png'
+  if (path.startsWith('http')) return path
+  return BASE_URL + path.replace(/^(\.\.\/|\.\/)+/, '')
+}
+
 onMounted(() => {
   const storedUser = localStorage.getItem('user')
   if (storedUser) {
@@ -208,6 +229,7 @@ const logout = () => {
   window.location.reload()
 }
 </script>
+<<<<<<< HEAD
 
 <style scoped>
 .header-toolbar {
@@ -307,3 +329,5 @@ const logout = () => {
   }
 }
 </style>
+=======
+>>>>>>> 11d82422a5421e0380bc628ce597865622d999e0

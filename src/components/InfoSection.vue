@@ -1,51 +1,55 @@
 <template>
   <section class="info-section">
     <div class="column">
-      <h3 class="section-title">À PROPOS DE <span class="highlight">FUMBO</span></h3>
+      <h3 class="section-title">
+        {{ $t('info.title1') }} <span class="highlight">{{ $t('info.title2') }}</span>
+      </h3>
       <ul class="link-list">
         <li>
           <router-link to="/Perso" class="link">
             <q-icon name="fas fa-users" class="icon" />
-            Personnel
+            {{ $t('info.Description1') }}
           </router-link>
         </li>
         <li>
           <router-link to="/Po" class="link">
             <q-icon name="shield" class="icon" />
-            Politique de confidentialité
+            {{ $t('info.Description2') }}
           </router-link>
         </li>
         <li>
           <router-link to="/Ml" class="link">
             <q-icon name="gavel" class="icon" />
-            Code d’éthique et de conduite
+            {{ $t('info.Description3') }}
           </router-link>
         </li>
       </ul>
     </div>
     <div class="column">
-      <h3 class="section-title">PARTAGEZ VOTRE <span class="highlight">HISTOIRE</span></h3>
+      <h3 class="section-title">
+        {{ $t('info.title3') }} <span class="highlight">{{ $t('info.title4') }}</span>
+      </h3>
       <ul class="link-list">
         <li>
           <router-link to="/Rec" class="link">
             <q-icon name="fas fa-lightbulb" class="icon" />
-            Astuces et recommandations pour la diffusion de contenu
+            {{ $t('info.Description4') }}
           </router-link>
         </li>
         <li>
           <router-link to="/Cont" class="link">
             <q-icon name="fas fa-id-card" class="icon" />
-            Fournir vos informations personnelles
+            {{ $t('info.Description5') }}
           </router-link>
         </li>
       </ul>
     </div>
     <div class="column contact">
-      <h3 class="section-title">FUMBO</h3>
+      <h3 class="section-title">{{ $t('info.title5') }}</h3>
       <div class="address-box">
         <p class="address">
-          103, av Carmel, Q. Katindo <br />
-          Goma, RDC
+          {{ $t('info.Description6') }} <br />
+          {{ $t('info.Description7') }}
         </p>
       </div>
 
@@ -58,6 +62,10 @@
     </div>
   </section>
 </template>
+<script>
+// import { useI18n } from 'vue-i18n'
+// const { t } = useI18n()
+</script>
 
 <style scoped>
 .info-section {
@@ -65,7 +73,7 @@
   flex-wrap: wrap;
   gap: 40px;
   padding: 40px 20px;
-  background-color: #f9f9f9;
+  background-color: #111010;
   justify-content: space-between;
 }
 .column {
@@ -118,7 +126,7 @@
 }
 .address-box {
   background-color: #f0f4f8;
-  border-left: 4px solid #007BFF;
+  border-left: 4px solid #007bff;
   border-radius: 8px;
   padding: 12px 16px;
   max-width: 300px;

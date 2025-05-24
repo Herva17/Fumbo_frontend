@@ -24,8 +24,6 @@
     <HeaderPage />
     <q-separator />
 
-    <!-- Header animé -->
-
     <q-card-section
       class="bg-blue-1 text-black rounded-borders section"
       style="border-radius: 10px 10px 0 0"
@@ -41,6 +39,7 @@
       <div class="row q-col-gutter-md">
         <!-- Colonne gauche -->
         <div class="col-12 col-md-6">
+          <br />
           <q-input
             v-model="book.titre_ouvrage"
             label="Titre de l'ouvrage *"
@@ -50,8 +49,8 @@
             :rules="[(val) => !!val || 'Ce champ est obligatoire']"
             bg-color="grey-2"
           />
-          <q-input
-            v-model="user.id"
+          <!-- <q-input
+            v-model="book.id_user"
             label="Auteur (ID) *"
             dense
             outlined
@@ -60,7 +59,7 @@
             :rules="[(val) => !!val || 'Ce champ est obligatoire']"
             bg-color="grey-2"
             readonly
-          />
+          /> -->
           <q-select
             v-model="book.id_categorie"
             label="Catégorie *"
@@ -119,21 +118,9 @@
             hint="Maximum 500 caractères"
           />
         </div>
-
         <!-- Colonne droite -->
+
         <div class="col-12 col-md-6">
-          <q-uploader
-            v-model="coverFile"
-            label="Image de couverture *"
-            accept="image/*"
-            max-file-size="5120000"
-            max-files="1"
-            class="full-width q-mb-md"
-            style="border: 2px dashed #1976d2; border-radius: 8px"
-            @added="previewCover"
-            @removed="coverPreview = null"
-            hide-upload-btn
-          />
           <q-input
             v-model="book.format"
             label="Format (ex: PDF, EPUB) *"
@@ -155,18 +142,7 @@
             :rules="[(val) => !!val || 'Ce champ est obligatoire']"
             bg-color="grey-2"
           />
-          <q-file
-            v-model="bookFile"
-            label="Fichier de l'ouvrage * (.pdf, .docx)"
-            outlined
-            dense
-            class="q-mt-md"
-            accept=".pdf,.doc,.docx"
-            bg-color="grey-2"
-            lazy-rules
-            :rules="[(val) => !!val || 'Ce champ est obligatoire']"
-          />
-          <q-select
+          <q-input
             v-model="book.tags"
             label="Mots-clés"
             dense
@@ -180,13 +156,24 @@
             bg-color="grey-2"
             @new-value="createTag"
           />
-          <q-input
-            v-model="book.datePub"
-            label="Date de publication *"
-            type="date"
+          <br />
+          <q-file
+            v-model="coverFile"
+            label="Image de couverture *"
+            accept="image/*"
             outlined
             dense
             class="q-mt-md"
+            :rules="[(val) => !!val || 'Ce champ est obligatoire']"
+          />
+          <q-file
+            v-model="bookFile"
+            label="Fichier de l'ouvrage * (.pdf, .docx)"
+            outlined
+            dense
+            class="q-mt-md"
+            accept=".pdf,.doc,.docx"
+            bg-color="grey-2"
             lazy-rules
             :rules="[(val) => !!val || 'Ce champ est obligatoire']"
           />
@@ -228,76 +215,64 @@
 import { ref, onMounted } from 'vue'
 import HeaderPage from 'src/components/HeaderPage.vue'
 import { useQuasar } from 'quasar'
-import { useCategorieStore } from 'src/stores/categorie' // <-- Import du store
-
+import { useCategorieStore } from 'src/stores/categorie'
+import { useEnregistreOuvrageStore } from 'src/stores/EnregistreOuvrage'
+import { useRouter } from 'vue-router'
+const router = useRouter()
 const $q = useQuasar()
-
+const enregistreOuvrageStore = useEnregistreOuvrageStore()
+const categorieStore = useCategorieStore()
+const searchQuery = ref('')
 const user = ref({
-  id:'',
+  id_user: '',
   username: '',
   prenom: '',
   image: '',
   bio: '',
 })
 
-onMounted(() => {
-  const storedUser = localStorage.getItem('user')
-  if (storedUser) {
-    user.value = JSON.parse(storedUser)
-  }
-})
-
-// Store Pinia pour les catégories
-const categorieStore = useCategorieStore()
-const categories = ref([])
-onMounted(async () => {
-  await categorieStore.fetchCategories()
-  console.log('categories API:', categorieStore.categories)
-
-  // On récupère le tableau dans .response
-  let rawCategories = categorieStore.categories?.response
-  if (!Array.isArray(rawCategories)) {
-    rawCategories = []
-  }
-
-  categories.value = rawCategories.map(cat => ({
-    label: cat.nom_categorie || cat.label || cat.nom || 'Catégorie',
-    value: cat.id_categorie || cat.value || cat.id
-  }))
-})
-
-  // Récupérer l'utilisateur pour l'auteur
-  const  storedUser = localStorage.getItem('user')
-  if (storedUser) {
-    try {
-      const userObj = JSON.parse(storedUser)
-      book.value.id_auteur = userObj.id_user || userObj.id || ''
-    } catch (error) {
-      console.error('Erreur lors de la récupération des données utilisateur :', error)
-    }
-  }
-
-
 const book = ref({
-  id_ouvrage: null,
   titre_ouvrage: '',
-  id_auteur: '',
+  id_user: '',
   id_categorie: null,
   annee_publication: '',
-  image: '',
   langue: '',
   isbn: '',
   resume: '',
   format: '',
   Nb_pages: '',
-  fichier_livre: null,
   tags: [],
-  datePub: '',
 })
 
 const coverFile = ref(null)
 const bookFile = ref(null)
 const loading = ref(false)
+const categories = ref([])
+
+onMounted(async () => {
+  // Récupérer l'utilisateur pour l'auteur
+  const storedUser = localStorage.getItem('user')
+  if (storedUser) {
+    try {
+      const userObj = JSON.parse(storedUser)
+      user.value = userObj
+      book.value.id_user = userObj.id_user || userObj.id || ''
+    } catch (error) {
+      console.error('Erreur lors de la récupération des données utilisateur :', error)
+    }
+  }
+
+  // Charger les catégories
+  await categorieStore.fetchCategories()
+  let rawCategories = categorieStore.categories?.response
+  if (!Array.isArray(rawCategories)) {
+    rawCategories = []
+  }
+  categories.value = rawCategories.map((cat) => ({
+    label: cat.nom_categorie || cat.label || cat.nom || 'Catégorie',
+    value: cat.id_categorie || cat.value || cat.id,
+  }))
+})
 
 const createTag = (val, done) => {
   if (val.length > 0) {
@@ -313,41 +288,40 @@ const resetForm = () => {
     persistent: true,
   }).onOk(() => {
     book.value = {
-      id_ouvrage: null,
       titre_ouvrage: '',
-      id_auteur: '',
+      id_user: user.value.id_user || user.value.id || '',
       id_categorie: null,
       annee_publication: '',
-      image: '',
       langue: '',
       isbn: '',
       resume: '',
       format: '',
       Nb_pages: '',
-      fichier_livre: null,
       tags: [],
-      datePub: '',
     }
     coverFile.value = null
     bookFile.value = null
-
-    // Réassigner l'ID de l'utilisateur connecté
-    const storedUser = localStorage.getItem('user')
-    if (storedUser) {
-      try {
-        const userObj = JSON.parse(storedUser)
-        book.value.id_auteur = userObj.id_user || userObj.id || ''
-      } catch (error) {
-        console.error('Erreur lors de la récupération des données utilisateur :', error)
-      }
-    }
   })
 }
+// ...existing code...
 
-const submitForm = () => {
+// Fonction pour échapper les caractères HTML
+function escapeHtml(text) {
+  if (!text) return ''
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/'/g, '&#039;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+}
+
+// ...existing code...
+
+const submitForm = async () => {
   if (
     !book.value.titre_ouvrage ||
-    !book.value.id_auteur ||
+    !book.value.id_user ||
     !book.value.id_categorie ||
     !book.value.annee_publication ||
     !coverFile.value ||
@@ -362,15 +336,44 @@ const submitForm = () => {
 
   loading.value = true
 
-  setTimeout(() => {
-    loading.value = false
+  const formData = new FormData()
+  formData.append('id_ouvrage', book.value.id_ouvrage)
+  // On échappe ici les champs texte
+  formData.append('titre_ouvrage', escapeHtml(book.value.titre_ouvrage))
+  formData.append('id_user', book.value.id_user)
+  formData.append('id_categorie', book.value.id_categorie)
+  formData.append('annee_publication', book.value.annee_publication)
+  formData.append('langue', book.value.langue)
+  formData.append('isbn', book.value.isbn)
+  formData.append('resume', escapeHtml(book.value.resume))
+  formData.append('format', book.value.format)
+  formData.append('Nb_pages', book.value.Nb_pages)
+  formData.append('tags', JSON.stringify(book.value.tags))
+  formData.append('image', coverFile.value)
+  formData.append('fichier_livre', bookFile.value)
+
+  await enregistreOuvrageStore.enregistrerOuvrage(formData)
+
+  loading.value = false
+
+  if (enregistreOuvrageStore.error) {
+    $q.notify({
+      type: 'negative',
+      message: "Erreur lors de l'enregistrement de l'ouvrage.",
+    })
+  } else {
     $q.notify({
       type: 'positive',
       message: 'Ouvrage publié avec succès!',
     })
-  }, 2000)
+    router.push('/ecrire')
+    resetForm()
+  }
 }
+
+// ...existing code...
 </script>
+
 <style scoped>
 .dashboard-page {
   padding: 0px;

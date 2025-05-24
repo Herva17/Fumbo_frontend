@@ -138,6 +138,17 @@ const getFullImageUrl = (imagePath) => {
   return imagePath.startsWith('http') ? imagePath : `${baseUrl}${imagePath}`
 }
 
+// Fonction pour échapper les caractères spéciaux HTML
+function escapeHtml(text) {
+  if (!text) return ''
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/'/g, '&#039;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+}
+
 // Formulaire réactif
 const form = ref({
   username: '',
@@ -195,7 +206,15 @@ const register = async () => {
     return
   }
 
-  await inscriptionStore.registerUser(form.value)
+  // On échappe ici les champs texte
+  const formToSend = {
+    ...form.value,
+    bio: escapeHtml(form.value.bio),
+    username: escapeHtml(form.value.username),
+    prenom: escapeHtml(form.value.prenom)
+  }
+
+  await inscriptionStore.registerUser(formToSend)
 
   if (!inscriptionStore.getError) {
     // Réinitialiser les validations du formulaire
@@ -218,7 +237,6 @@ const resetMessages = () => {
   inscriptionStore.successMessage = null
 }
 </script>
-
 <style scoped>
 /* Style général */
 .register-page {

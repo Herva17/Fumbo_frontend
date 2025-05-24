@@ -4,10 +4,9 @@
     <!-- Section Notre Équipe -->
     <section class="equipe-section w-full">
       <div class="container">
-        
         <h2 class="section-title">
-          <span class="subtitle">Notre Équipe</span>
-          Les personnes talentueuses qui contribuent à notre réussite.
+          <span class="subtitle">{{ $t('personnel.title1') }}</span>
+          {{ $t('personnel.Dsc1') }}
         </h2>
 
         <div class="team-list">
@@ -57,35 +56,35 @@
     <!-- Section Formulaire -->
     <section class="form-section w-full mt-10">
       <div class="form-container">
-        <h3 class="form-title">Rejoignez notre équipe</h3>
+        <h3 class="form-title">{{ $t('personnel.title2') }}</h3>
         <form @submit.prevent="submitForm">
           <div class="form-group">
-            <label>Nom complet</label>
+            <label>{{ $t('personnel.Dsc2') }}</label>
             <input type="text" v-model="nom" required />
           </div>
 
           <div class="form-group">
-            <label>Email</label>
+            <label>{{ $t('personnel.Dsc3') }}</label>
             <input type="email" v-model="email" required />
           </div>
 
           <div class="form-group">
-            <label>Domaine</label>
+            <label>{{ $t('personnel.Dsc4') }}</label>
             <select v-model="poste" required>
-              <option disabled value="">-- Sélectionnez un domaine --</option>
-              <option value="developpement">Développement</option>
-              <option value="design">Design / UI-UX</option>
-              <option value="marketing">Marketing</option>
-              <option value="autre">Autre</option>
+              <option disabled value="">-- {{ $t('personnel.Dsc5') }} --</option>
+              <option value="developpement">{{ $t('personnel.Dsc6') }}</option>
+              <option value="design">{{ $t('personnel.Dsc7') }}</option>
+              <option value="marketing">{{ $t('personnel.Dsc8') }}</option>
+              <option value="autre">{{ $t('personnel.Dsc9') }}</option>
             </select>
           </div>
 
           <div class="form-group" v-if="poste === 'autre'">
-            <label>Précisez le domaine</label>
+            <label>{{ $t('personnel.Dsc10') }}</label>
             <input type="text" v-model="autrePoste" required />
           </div>
 
-          <button type="submit" class="submit-btn">Envoyer la candidature</button>
+          <button type="submit" class="submit-btn">{{ $t('personnel.Dsc11') }}</button>
         </form>
       </div>
     </section>
@@ -156,7 +155,7 @@ const submitForm = () => {
 
 <style scoped>
 .equipe-section {
-  padding: 60px 20px;
+  padding: 10px 20px;
   background: #f5f7fa;
   font-family: Arial, sans-serif;
 }
@@ -168,20 +167,21 @@ const submitForm = () => {
 
 /* Titre */
 .section-title {
-  border: 2px solid #0284c7;       /* Cadre bleu */
-  background-color: #f0f9ff;       /* Fond doux et professionnel */
+  border: 2px solid #0284c7; /* Cadre bleu */
+  background-color: #f0f9ff; /* Fond doux et professionnel */
   padding: 20px;
-  border-radius: 8px;              /* Coins arrondis */
+  border-radius: 8px; /* Coins arrondis */
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1); /* Ombre discrète */
   max-width: 700px;
   margin: 40px auto;
   text-align: center;
   /* font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; */
   color: #1e293b;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
   font-size: 22px;
   font-weight: bold;
-  
 }
 
 .section-title:hover {
@@ -214,6 +214,7 @@ const submitForm = () => {
   transition: transform 0.3s ease;
   width: 320px;
   flex-shrink: 0;
+  padding: 10px;
 }
 
 .team-card:hover {
@@ -224,7 +225,7 @@ const submitForm = () => {
   width: 100%;
   display: flex;
   justify-content: center;
-  padding: 16px 0;
+  padding: 10px;
   background-color: #f0f9ff;
 }
 
@@ -300,6 +301,8 @@ const submitForm = () => {
 .form-section {
   padding: 60px 20px 80px;
   background-color: #f9fafb;
+  width: 600px;
+  height: 300px;
 }
 
 .form-container {
