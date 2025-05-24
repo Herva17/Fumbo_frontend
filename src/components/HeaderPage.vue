@@ -2,20 +2,13 @@
   <q-header elevated class="bg-white text-black shadow-sm" style="height: 80px">
     <q-toolbar class="q-px-lg header-toolbar">
       <!-- Logo -->
-      <q-avatar size="80px" class="logo-avatar">
+      <q-avatar size="50px" class="logo-avatar">
         <img src="/img/fumbo_logo.png" style="background: none" />
       </q-avatar>
       <q-space />
 
       <!-- Menu hamburger sur mobile UNIQUEMENT -->
-      <q-btn
-        flat
-        dense
-        round
-        icon="menu"
-        class="togglebar-mobile"
-        @click="drawer = true"
-      />
+      <q-btn flat dense round icon="menu" class="togglebar-mobile" @click="drawer = true" />
 
       <!-- Champ de recherche (masqué sur mobile) -->
       <q-input
@@ -34,7 +27,6 @@
 
       <!-- Liens de navigation (masqués sur mobile) -->
       <div class="nav-btns flex items-center gap-4 q-xs-none q-sm-none" style="margin-top: -10px">
-        <q-btn flat label="Librairie" class="hover-underline-animation" to="/ecrire" />
         <q-btn flat label="Livres gratuit" class="hover-underline-animation" to="/ouvrage" />
         <q-btn flat label="Écrire" class="hover-underline-animation" to="/write" />
         <q-btn flat label="Publier" class="hover-underline-animation" to="/create-book" />
@@ -71,7 +63,8 @@
                       </div>
                       <div class="text-caption q-mb-sm">✧ ✧ ✧ ✧ ✧ ✧</div>
                       <div class="q-mb-sm">
-                        <strong>Véronique:</strong> Super histoire, on attend la suite avec impatience, merci !!! 😊
+                        <strong>Véronique:</strong> Super histoire, on attend la suite avec
+                        impatience, merci !!! 😊
                       </div>
                       <div class="text-caption text-primary">Lire la critique complète</div>
                     </div>
