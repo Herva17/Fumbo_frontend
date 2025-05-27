@@ -38,83 +38,116 @@
 
           <!-- Bouton Notifications -->
           <!-- Bouton Notifications -->
-<q-btn flat round icon="notifications" class="notif">
-  <q-badge v-if="unreadCount" floating color="red">{{ unreadCount }}</q-badge>
-  <q-menu
-    anchor="bottom right"
-    self="top right"
-  >
-    <q-card style="width: 400px; max-width: 100vw">
-      <q-tabs
-        v-model="notifTab"
-        dense
-        class="text-grey-8"
-        active-color="primary"
-        indicator-color="primary"
-      >
-        <q-tab name="story" label="Histoire" />
-        <q-tab name="community" label="Communauté" />
-        <q-tab name="system" label="Système" />
-      </q-tabs>
-      <q-separator />
-      <q-tab-panels v-model="notifTab" animated>
-        <q-tab-panel name="story">
-          <template v-if="recentBooks.length">
-            <div v-for="ouvrage in recentBooks" :key="ouvrage.id_ouvrage" class="q-pa-sm row items-center">
-              <q-avatar size="40px" class="q-mr-md">
-                <img :src="getUserImage(ouvrage.user_image)" alt="Auteur" />
-              </q-avatar>
-              <div class="col">
-                <div class="text-subtitle2 q-mb-xs">
-                  {{ ouvrage.titre_ouvrage }}
-                  <span class="text-caption">par {{ ouvrage.username }} {{ ouvrage.prenom }}</span>
-                  <q-badge
-                    v-if="!readNotifs.includes(ouvrage.id_ouvrage)"
-                    color="red"
-                    rounded
-                    label="Nouveau"
-                    class="q-ml-sm"
-                  />
-                </div>
-                <div class="text-caption q-mb-xs">
-                  Publié il y a {{ timeSince(ouvrage.datePub) }}
-                </div>
-                <div class="q-mb-xs">
-                  <strong>Catégorie :</strong> {{ ouvrage.nom_categorie }}
-                </div>
-                <div class="text-caption text-primary">
+          <q-btn flat round icon="notifications" class="notif">
+            <q-badge v-if="unreadCount" floating color="red">{{ unreadCount }}</q-badge>
+            <q-menu anchor="bottom right" self="top right">
+              <q-card style="width: 400px; max-width: 100vw">
+                <q-tabs
+                  v-model="notifTab"
+                  dense
+                  class="text-grey-8"
+                  active-color="primary"
+                  indicator-color="primary"
+                >
+                  <q-tab name="story" label="Histoire" />
+                  <q-tab name="community" label="Communauté" />
+                  <q-tab name="system" label="Système" />
+                </q-tabs>
+                <q-separator />
+                <q-tab-panels v-model="notifTab" animated>
+                  <q-tab-panel name="story">
+                    <template v-if="recentBooks.length">
+                      <div
+                        v-for="ouvrage in recentBooks"
+                        :key="ouvrage.id_ouvrage"
+                        class="q-pa-sm row items-center"
+                        style="align-items: flex-start"
+                      >
+                        <!-- Ligne principale : avatar user, titre, nom auteur, badge, image ouvrage -->
+                        <div class="row items-center col-12" style="gap: 10px">
+                          <!-- Avatar utilisateur -->
+                          <q-avatar size="40px">
+                            <img :src="getUserImage(ouvrage.user_image)" alt="Auteur" />
+                          </q-avatar>
+                          <!-- Titre et auteur -->
+                          <div class="column" style="flex: 1">
+                            <div
+                              class="text-subtitle2"
+                              style="display: flex; align-items: center; gap: 8px"
+                            >
+                              <span>{{ ouvrage.titre_ouvrage }}</span>
+                              <span class="text-caption"
+                                >par {{ ouvrage.username }} {{ ouvrage.prenom }}</span
+                              >
+                              <q-badge
+                                v-if="!readNotifs.includes(ouvrage.id_ouvrage)"
+                                color="red"
+                                rounded
+                                label="Nouveau"
+                                class="q-ml-sm"
+                              />
+                            </div>
+                          </div>
+                          <!-- Image de l'ouvrage -->
+                          <q-avatar size="48px" square>
+                            <img
+                              :src="
+                                ouvrage.ouvrage_image
+                                  ? getUserImage(ouvrage.ouvrage_image)
+                                  : '/img/default-book.jpg'
+                              "
+                              alt="Ouvrage"
+                            />
+                          </q-avatar>
+                        </div>
+                        <!-- Infos complémentaires -->
+                        <div class="col-12 q-ml-lg">
+                          <div class="text-caption q-mb-xs">
+                            Publié il y a {{ timeSince(ouvrage.datePub) }}
+                          </div>
+                          <div class="q-mb-xs">
+                            <strong>Catégorie :</strong> {{ ouvrage.nom_categorie }}
+                          </div>
+                          <div class="text-caption text-primary">
+                            <q-btn
+                              flat
+                              dense
+                              color="primary"
+                              label="Voir le livre"
+                              :to="`/ouvrage/${ouvrage.id_ouvrage}`"
+                              @click="markOneAsRead(ouvrage.id_ouvrage)"
+                            />
+                          </div>
+                          <hr />
+                        </div>
+                        <q-separator spaced class="col-12" />
+                      </div>
+                    </template>
+                    <div v-else class="q-pa-sm text-center text-grey-6">
+                      Aucun nouveau livre publié aujourd'hui
+                    </div>
+                  </q-tab-panel>
+                  <q-tab-panel name="community">
+                    <div class="q-pa-sm text-center text-grey-6">
+                      Aucune notification communautaire
+                    </div>
+                  </q-tab-panel>
+                  <q-tab-panel name="system">
+                    <div class="q-pa-sm text-center text-grey-6">Aucune notification système</div>
+                  </q-tab-panel>
+                </q-tab-panels>
+                <div class="row justify-center q-pa-sm">
                   <q-btn
                     flat
-                    dense
+                    label="Afficher toutes les notifications"
                     color="primary"
-                    label="Voir le livre"
-                    :to="`/ouvrage/${ouvrage.id_ouvrage}`"
-                    @click="markOneAsRead(ouvrage.id_ouvrage)"
+                    dense
+                    @click="markAllAsRead"
                   />
                 </div>
-              </div>
-              <q-separator spaced class="col-12" />
-            </div>
-          </template>
-          <div v-else class="q-pa-sm text-center text-grey-6">
-            Aucun nouveau livre publié aujourd'hui
-          </div>
-        </q-tab-panel>
-        <q-tab-panel name="community">
-          <div class="q-pa-sm text-center text-grey-6">
-            Aucune notification communautaire
-          </div>
-        </q-tab-panel>
-        <q-tab-panel name="system">
-          <div class="q-pa-sm text-center text-grey-6">Aucune notification système</div>
-        </q-tab-panel>
-      </q-tab-panels>
-      <div class="row justify-center q-pa-sm">
-        <q-btn flat label="Afficher toutes les notifications" color="primary" dense @click="markAllAsRead" />
-      </div>
-    </q-card>
-  </q-menu>
-</q-btn>
+              </q-card>
+            </q-menu>
+          </q-btn>
 
           <!-- Menu Profil -->
           <q-btn flat round>
@@ -230,13 +263,13 @@ function timeSince(dateString) {
 
 // Livres publiés il y a moins d'un jour
 const recentBooks = computed(() =>
-  (ouvrageStore.ouvrages || []).filter(o => {
+  (ouvrageStore.ouvrages || []).filter((o) => {
     if (!o.datePub) return false
     const now = new Date()
     const pub = new Date(o.datePub.replace(' ', 'T'))
     const diff = (now - pub) / (1000 * 60 * 60 * 24)
     return diff < 1
-  })
+  }),
 )
 
 // Gestion des notifications lues/non lues via localStorage
@@ -263,7 +296,7 @@ function getReadNotifs() {
 
 // Marquer toutes les notifications comme lues
 function markAllAsRead() {
-  const ids = recentBooks.value.map(o => o.id_ouvrage)
+  const ids = recentBooks.value.map((o) => o.id_ouvrage)
   localStorage.setItem(NOTIF_KEY, JSON.stringify(ids))
   readNotifs.value = ids
 }
@@ -280,13 +313,12 @@ function markOneAsRead(id) {
 
 // Marquer toutes comme lues à l'ouverture du menu
 
-
 // Liste réactive des notifications lues
 const readNotifs = ref(getReadNotifs())
 
 // Notifications non lues
 const unreadRecentBooks = computed(() =>
-  recentBooks.value.filter(o => !readNotifs.value.includes(o.id_ouvrage))
+  recentBooks.value.filter((o) => !readNotifs.value.includes(o.id_ouvrage)),
 )
 const unreadCount = computed(() => unreadRecentBooks.value.length)
 
