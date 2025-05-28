@@ -1,7 +1,6 @@
 <template>
   <q-page class="dashboard-page">
     <HeaderPage />
-
     <q-separator />
     <BannerSection class="banner" />
     <q-separator />
@@ -25,14 +24,14 @@
       />
     </div>
 
-    <!-- Liste dynamique selon le bouton sélectionné et le filtre -->
     <div class="stories-list">
-      <!-- Ouvrages -->
+      <!-- Ouvrages dynamiques -->
       <template v-if="sort === 'ouvrage'">
         <q-card
           v-for="ouvrage in filteredOuvrages"
           :key="ouvrage.id_ouvrage"
           class="story-card q-mb-lg"
+          @mouseenter="loadAbonnes(ouvrage)"
         >
           <q-card-section horizontal>
             <q-img
@@ -54,6 +53,19 @@
                 />
                 {{ ouvrage.username }} {{ ouvrage.prenom }}
                 <q-chip dense>{{ ouvrage.nom_nationalite }}</q-chip>
+                <q-badge color="primary" class="q-ml-sm">
+                  {{ abonnésCount[ouvrage.id_user || ouvrage.id_auteur] || 0 }} abonnés
+                </q-badge>
+                <q-btn
+                  v-if="!isSelf(ouvrage)"
+                  flat
+                  dense
+                  :color="isAbonne(ouvrage) ? 'primary' : 'grey-7'"
+                  :label="isAbonne(ouvrage) ? 'Abonné' : 'S’abonner'"
+                  icon="person_add"
+                  @click="toggleAbonnement(ouvrage)"
+                  class="q-ml-sm"
+                />
               </div>
               <div class="q-mb-xs">
                 <q-chip dense>{{ ouvrage.nom_categorie }}</q-chip>
@@ -117,22 +129,24 @@
         </q-card>
       </template>
 
-      <!-- Histoires -->
+      <!-- Histoires dynamiques -->
       <template v-else-if="sort === 'histoire'">
         <q-card
           v-for="histoire in filteredHistoires"
-          :key="histoire.id_histoire || histoire.id || histoire.titre"
+          :key="histoire.id_histoire"
           class="story-card q-mb-lg"
+          @mouseenter="loadAbonnes(histoire)"
         >
           <q-card-section>
             <div class="row items-center q-mb-sm">
               <q-avatar color="primary" text-color="white" size="40px" class="q-mr-md">
-                <q-icon name="menu_book" />
+                <img :src="getFullUrl(histoire.image)" alt="Auteur" v-if="histoire.image" />
+                <q-icon v-else name="menu_book" />
               </q-avatar>
               <div>
                 <div class="text-h6 ouvrage-title">{{ histoire.titre }}</div>
                 <div class="text-caption text-grey-7">
-                  Publiée {{ timeSince(histoire.datePub) }}
+                  Publiée {{ timeSince(histoire.date_creation) }}
                 </div>
               </div>
             </div>
@@ -141,7 +155,26 @@
                 {{ histoire.nom_categorie || 'Histoire' }}
               </q-chip>
               <span class="text-caption text-grey-8 q-ml-sm">
-                Auteur : {{ histoire.username || user.username }}
+                Auteur : {{ histoire.username }} {{ histoire.prenom }}
+              </span>
+              <q-chip dense class="q-ml-sm">{{ histoire.nom_nationalite }}</q-chip>
+              <q-badge color="primary" class="q-ml-sm">
+                {{ abonnésCount[histoire.id_user || histoire.id_auteur] || 0 }} abonnés
+              </q-badge>
+              <q-btn
+                v-if="!isSelf(histoire)"
+                flat
+                dense
+                :color="isAbonne(histoire) ? 'primary' : 'grey-7'"
+                :label="isAbonne(histoire) ? 'Abonné' : 'S’abonner'"
+                icon="person_add"
+                @click="toggleAbonnement(histoire)"
+                class="q-ml-sm"
+              />
+            </div>
+            <div class="q-mb-xs" v-if="histoire.personnages_principaux">
+              <span class="text-caption text-grey-7">
+                Personnages : {{ histoire.personnages_principaux }}
               </span>
             </div>
             <div class="q-mb-md">
@@ -149,7 +182,18 @@
                 {{ histoire.description }}
               </span>
             </div>
-            <div>
+            <div class="row q-mt-sm q-gutter-sm">
+              <q-btn flat round icon="favorite_border" color="pink" @click="onLike(histoire)" />
+              <q-btn
+                flat
+                round
+                icon="chat_bubble_outline"
+                color="primary"
+                @click="onComment(histoire)"
+              />
+              <q-btn flat round icon="share" color="teal" @click="onShare(histoire)" />
+            </div>
+            <div class="q-mt-md">
               <q-btn
                 flat
                 color="primary"
@@ -172,21 +216,109 @@
 
     <!-- Modal biographie auteur -->
     <q-dialog v-model="showBioModal">
-      <!-- ...inchangé... -->
+      <q-card style="max-width: 400px">
+        <q-card-section>
+          <div class="text-h6 q-mb-sm">Biographie de l'auteur</div>
+          <div class="text-subtitle2 q-mb-xs row items-center">
+            <q-avatar size="40px" class="q-mr-md">
+              <img :src="getFullUrl(selectedOuvrage?.user_image)" alt="Photo de l'auteur" />
+            </q-avatar>
+            <div>
+              {{ selectedOuvrage?.username }} {{ selectedOuvrage?.prenom }}
+              <q-chip dense>{{ selectedOuvrage?.nom_nationalite }}</q-chip>
+            </div>
+          </div>
+          <div class="q-mb-md">
+            <span class="text-caption text-grey-8">
+              {{ selectedOuvrage?.bio }}
+            </span>
+            <div v-if="selectedOuvrage?.email" class="q-mt-sm">
+              <q-btn
+                flat
+                color="primary"
+                icon="email"
+                :label="`Contacter l'auteur`"
+                :href="`mailto:${selectedOuvrage.email}`"
+                target="_blank"
+                class="q-mt-xs"
+              />
+            </div>
+          </div>
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat label="Fermer" color="primary" v-close-popup />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <!-- Modal lecture histoire -->
+    <q-dialog v-model="showHistoireModal">
+      <q-card style="max-width: 600px">
+        <q-card-section>
+          <div class="text-h6 q-mb-sm">{{ selectedHistoire?.titre }}</div>
+          <div class="text-caption text-grey-7 q-mb-xs">
+            Publiée {{ timeSince(selectedHistoire?.date_creation) }}
+          </div>
+          <div class="q-mb-xs">
+            <q-chip dense color="primary" text-color="white">
+              {{ selectedHistoire?.nom_categorie || 'Histoire' }}
+            </q-chip>
+            <span class="text-caption text-grey-8 q-ml-sm">
+              Auteur : {{ selectedHistoire?.username }} {{ selectedHistoire?.prenom }}
+            </span>
+            <q-chip dense class="q-ml-sm">{{ selectedHistoire?.nom_nationalite }}</q-chip>
+          </div>
+          <div class="q-mb-md">
+            <span class="text-caption text-grey-7" v-if="selectedHistoire?.personnages_principaux">
+              Personnages : {{ selectedHistoire?.personnages_principaux }}
+            </span>
+          </div>
+          <div class="q-mb-md">
+            <span class="story-description">
+              {{ selectedHistoire?.histoire }}
+            </span>
+          </div>
+          <div class="q-mb-md">
+            <span class="text-caption text-grey-8">
+              Email : {{ selectedHistoire?.email }}
+            </span>
+          </div>
+          <div class="q-mb-md">
+            <span class="text-caption text-grey-8">
+              Bio : {{ selectedHistoire?.bio }}
+            </span>
+          </div>
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat label="Fermer" color="primary" v-close-popup />
+        </q-card-actions>
+      </q-card>
     </q-dialog>
 
     <FooterPage />
+
+    <!-- Notification pour nouvelle histoire -->
+    <q-notification
+      v-model="showNotif"
+      color="primary"
+      icon="menu_book"
+      :message="notifMessage"
+      position="top-right"
+      timeout="3000"
+    />
   </q-page>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
+import { useQuasar } from 'quasar'
 import BannerSection from 'src/components/BannerSection.vue'
 import HeaderPage from 'src/components/HeaderPage.vue'
 import FooterPage from 'src/components/FooterPage.vue'
 import { useCategorieStore } from 'src/stores/categorie'
 import { useAfficherOuvrageStore } from 'src/stores/AfficherOuvrage'
-import { useQuasar } from 'quasar'
+import { useAfficherHistoireStore } from 'src/stores/AfficherHistoire'
+import { useAbonnementStore } from 'src/stores/gestionAbonnement'
 
 const $q = useQuasar()
 
@@ -206,36 +338,71 @@ const toggleOptions = [
   { label: 'Autres', value: 'Autres' }
 ]
 
-const user = ref({
-  username: 'Auteur1',
-})
-
-// --- Ouvrages dynamiques ---
 const categorieStore = useCategorieStore()
 const ouvrageStore = useAfficherOuvrageStore()
-
-// --- Histoires statiques pour test ---
-const histoires = ref([
-  {
-    id_histoire: 1,
-    titre: "La légende du baobab",
-    description: "Il était une fois, au cœur de l'Afrique, un baobab magique qui... ",
-    nom_categorie: "Conte",
-    username: "Fatou N'Diaye",
-    datePub: "2024-06-01 12:00:00"
-  },
-  {
-    id_histoire: 2,
-    titre: "Le lion et le chasseur",
-    description: "Un conte sur le courage et la sagesse...",
-    nom_categorie: "Conte",
-    username: "Mamadou Diallo",
-    datePub: "2024-06-02 15:30:00"
-  }
-])
+const histoireStore = useAfficherHistoireStore()
+const abonnementStore = useAbonnementStore()
 
 const showBioModal = ref(false)
 const selectedOuvrage = ref(null)
+const selectedHistoire = ref(null)
+const showHistoireModal = ref(false)
+
+// Notification pour nouvelle histoire
+const showNotif = ref(false)
+const notifMessage = ref('')
+
+// Utilise le store pour la liste des abonnements et le nombre d'abonnés
+const abonnements = abonnementStore.abonnements
+const abonnésCount = abonnementStore.abonnésCount
+
+// Récupérer l'utilisateur courant depuis le localStorage
+const user = ref(null)
+onMounted(() => {
+  const userData = localStorage.getItem('user')
+  if (userData) {
+    user.value = JSON.parse(userData)
+  }
+})
+
+function isAbonne(item) {
+  return (abonnements.value || []).includes(item.id_user)
+}
+function isSelf(item) {
+  return user.value && (String(user.value.id) === String(item.id_user))
+}
+
+async function loadAbonnes(item) {
+  const id = item.id_user || item.id_auteur
+  if (id) {
+    await abonnementStore.compterAbonnesAuteur(id)
+  }
+}
+
+async function toggleAbonnement(item) {
+  const idAuteur = item.id_user
+  const idAbonne = user.value?.id
+  if (!idAuteur || !idAbonne) {
+    $q.notify({ type: 'negative', message: "Aucun auteur ou abonné trouvé pour l'abonnement" })
+    return
+  }
+  if (isAbonne(item)) {
+    abonnements.value = abonnements.value.filter(a => a !== idAuteur)
+    $q.notify({ type: 'info', message: `Désabonné de ${item.username} ${item.prenom}` })
+    await loadAbonnes(item)
+  } else {
+    const res = await abonnementStore.ajouterAbonnement(idAuteur, idAbonne)
+    if (res && res.succes) {
+      if (!abonnements.value.includes(idAuteur)) {
+        abonnements.value.push(idAuteur)
+      }
+      $q.notify({ type: 'positive', message: 'Abonnement ajouté' })
+      await loadAbonnes(item)
+    } else {
+      $q.notify({ type: 'negative', message: res?.message || "Erreur lors de l'abonnement" })
+    }
+  }
+}
 
 function showBio(ouvrage) {
   selectedOuvrage.value = ouvrage
@@ -243,10 +410,14 @@ function showBio(ouvrage) {
 }
 
 function showHistoire(histoire) {
-  $q.notify({
-    type: 'info',
-    message: histoire.description || 'Aperçu de l\'histoire'
-  })
+  selectedHistoire.value = histoire
+  showHistoireModal.value = true
+}
+
+// Simule la notification lors de la publication d'une histoire
+function notifyNewHistoire(histoire) {
+  notifMessage.value = `Nouvelle histoire publiée : "${histoire.titre}" par ${histoire.username} ${histoire.prenom}`
+  showNotif.value = true
 }
 
 const BASE_URL = 'http://localhost/'
@@ -303,9 +474,13 @@ onMounted(async () => {
   ]
 
   await ouvrageStore.fetchOuvrages()
+  await histoireStore.fetchHistoires()
+  // Notification si nouvelle histoire (exemple : la dernière du tableau)
+  if (histoireStore.histoires.length > 0) {
+    notifyNewHistoire(histoireStore.histoires[histoireStore.histoires.length - 1])
+  }
 })
 
-// Ouvrages dynamiques
 const filteredOuvrages = computed(() => {
   let list = ouvrageStore.ouvrages
   if (filter.value && filter.value !== 'Tous') {
@@ -316,9 +491,10 @@ const filteredOuvrages = computed(() => {
   return list
 })
 
-// Histoires statiques (à remplacer par store ou API plus tard)
+// Filtrage par catégorie pour les histoires
 const filteredHistoires = computed(() => {
-  let list = histoires.value
+  let list = histoireStore.histoires
+  if (!Array.isArray(list)) return []
   if (filter.value && filter.value !== 'Tous') {
     list = list.filter(h =>
       h.nom_categorie && h.nom_categorie.toLowerCase() === filter.value.toLowerCase()
@@ -331,14 +507,14 @@ watch(sort, () => {
   filter.value = 'Tous'
 })
 
-function onLike(ouvrage) {
-  console.log('Like', ouvrage.id_ouvrage)
+function onLike(item) {
+  $q.notify({ type: 'positive', message: `Vous aimez "${item.titre || item.titre_ouvrage}" !` })
 }
-function onComment(ouvrage) {
-  console.log('Comment', ouvrage.id_ouvrage)
+function onComment(item) {
+  $q.notify({ type: 'info', message: `Commenter "${item.titre || item.titre_ouvrage}"` })
 }
-function onShare(ouvrage) {
-  console.log('Share', ouvrage.id_ouvrage)
+function onShare(item) {
+  $q.notify({ type: 'primary', message: `Partager "${item.titre || item.titre_ouvrage}"` })
 }
 </script>
 

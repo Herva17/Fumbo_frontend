@@ -37,7 +37,6 @@
           <q-space />
 
           <!-- Bouton Notifications -->
-          <!-- Bouton Notifications -->
           <q-btn flat round icon="notifications" class="notif">
             <q-badge v-if="unreadCount" floating color="red">{{ unreadCount }}</q-badge>
             <q-menu anchor="bottom right" self="top right">
@@ -56,6 +55,66 @@
                 <q-separator />
                 <q-tab-panels v-model="notifTab" animated>
                   <q-tab-panel name="story">
+                    <!-- Histoires récentes -->
+                    <template v-if="recentHistoires.length">
+                      <div
+                        v-for="histoire in recentHistoires"
+                        :key="histoire.id_histoire"
+                        class="q-pa-sm row items-center"
+                        style="align-items: flex-start"
+                      >
+                        <div class="row items-center col-12" style="gap: 10px">
+                          <q-avatar size="40px">
+                            <img :src="getUserImage(histoire.image)" alt="Auteur" />
+                          </q-avatar>
+                          <div class="column" style="flex: 1">
+                            <div
+                              class="text-subtitle2"
+                              style="display: flex; align-items: center; gap: 8px"
+                            >
+                              <span>{{ histoire.titre }}</span>
+                              <span class="text-caption"
+                                >par {{ histoire.username }} {{ histoire.prenom }}</span
+                              >
+                              <q-badge
+                                v-if="!readHistoires.includes(histoire.id_histoire)"
+                                color="red"
+                                rounded
+                                label="Nouveau"
+                                class="q-ml-sm"
+                              />
+                            </div>
+                          </div>
+                          <q-avatar size="48px" square>
+                           
+                          </q-avatar>
+                        </div>
+                        <div class="col-12 q-ml-lg">
+                          <div class="text-caption q-mb-xs">
+                            Publiée il y a {{ timeSince(histoire.date_creation) }}
+                          </div>
+                          <div class="q-mb-xs">
+                            <strong>Auteur :</strong> {{ histoire.username }} {{ histoire.prenom }}
+                          </div>
+                          <div class="text-caption text-primary">
+                            <q-btn
+                              flat
+                              dense
+                              color="primary"
+                              label="Voir l'histoire"
+                              :to="`/histoire/${histoire.id_histoire}`"
+                              @click="markOneHistoireAsRead(histoire.id_histoire)"
+                            />
+                          </div>
+                          <hr />
+                        </div>
+                        <q-separator spaced class="col-12" />
+                      </div>
+                    </template>
+                    <div v-else class="q-pa-sm text-center text-grey-6">
+                      Aucune nouvelle histoire publiée aujourd'hui
+                    </div>
+                    <!-- Livres récents -->
                     <template v-if="recentBooks.length">
                       <div
                         v-for="ouvrage in recentBooks"
@@ -63,13 +122,10 @@
                         class="q-pa-sm row items-center"
                         style="align-items: flex-start"
                       >
-                        <!-- Ligne principale : avatar user, titre, nom auteur, badge, image ouvrage -->
                         <div class="row items-center col-12" style="gap: 10px">
-                          <!-- Avatar utilisateur -->
                           <q-avatar size="40px">
                             <img :src="getUserImage(ouvrage.user_image)" alt="Auteur" />
                           </q-avatar>
-                          <!-- Titre et auteur -->
                           <div class="column" style="flex: 1">
                             <div
                               class="text-subtitle2"
@@ -88,7 +144,6 @@
                               />
                             </div>
                           </div>
-                          <!-- Image de l'ouvrage -->
                           <q-avatar size="48px" square>
                             <img
                               :src="
@@ -100,7 +155,6 @@
                             />
                           </q-avatar>
                         </div>
-                        <!-- Infos complémentaires -->
                         <div class="col-12 q-ml-lg">
                           <div class="text-caption q-mb-xs">
                             Publié il y a {{ timeSince(ouvrage.datePub) }}
@@ -143,6 +197,13 @@
                     color="primary"
                     dense
                     @click="markAllAsRead"
+                  />
+                  <q-btn
+                    flat
+                    label="Tout marquer comme lu"
+                    color="primary"
+                    dense
+                    @click="markAllHistoiresAsRead"
                   />
                 </div>
               </q-card>
@@ -244,8 +305,10 @@
 import { ref, onMounted, computed } from 'vue'
 import LangSwitcher from 'src/components/LangSwitcher.vue'
 import { useAfficherOuvrageStore } from 'src/stores/AfficherOuvrage'
+import { useAfficherHistoireStore } from 'src/stores/AfficherHistoire'
 
 const ouvrageStore = useAfficherOuvrageStore()
+const histoireStore = useAfficherHistoireStore()
 
 function timeSince(dateString) {
   if (!dateString) return ''
@@ -272,8 +335,20 @@ const recentBooks = computed(() =>
   }),
 )
 
+// Histoires publiées il y a moins d'un jour
+const recentHistoires = computed(() =>
+  (histoireStore.histoires || []).filter((h) => {
+    if (!h.date_creation) return false
+    const now = new Date()
+    const pub = new Date(h.date_creation.replace(' ', 'T'))
+    const diff = (now - pub) / (1000 * 60 * 60 * 24)
+    return diff < 1
+  }),
+)
+
 // Gestion des notifications lues/non lues via localStorage
 const NOTIF_KEY = 'fumbo_read_notifs'
+const NOTIF_HISTOIRE_KEY = 'fumbo_read_histoires'
 const notifTab = ref('story')
 const searchQuery = ref('')
 const drawer = ref(false)
@@ -285,7 +360,7 @@ const user = ref({
   bio: '',
 })
 
-// Récupère la liste des IDs de notifications déjà lues
+// Récupère la liste des IDs de notifications déjà lues (ouvrages)
 function getReadNotifs() {
   try {
     return JSON.parse(localStorage.getItem(NOTIF_KEY)) || []
@@ -293,15 +368,33 @@ function getReadNotifs() {
     return []
   }
 }
+const readNotifs = ref(getReadNotifs())
 
-// Marquer toutes les notifications comme lues
+// Récupère la liste des IDs de notifications déjà lues (histoires)
+function getReadHistoires() {
+  try {
+    return JSON.parse(localStorage.getItem(NOTIF_HISTOIRE_KEY)) || []
+  } catch {
+    return []
+  }
+}
+const readHistoires = ref(getReadHistoires())
+
+// Marquer toutes les notifications ouvrages comme lues
 function markAllAsRead() {
   const ids = recentBooks.value.map((o) => o.id_ouvrage)
   localStorage.setItem(NOTIF_KEY, JSON.stringify(ids))
   readNotifs.value = ids
 }
 
-// Marquer une notification comme lue
+// Marquer toutes les notifications histoires comme lues
+function markAllHistoiresAsRead() {
+  const ids = recentHistoires.value.map((h) => h.id_histoire)
+  localStorage.setItem(NOTIF_HISTOIRE_KEY, JSON.stringify(ids))
+  readHistoires.value = ids
+}
+
+// Marquer une notification ouvrage comme lue
 function markOneAsRead(id) {
   const current = getReadNotifs()
   if (!current.includes(id)) {
@@ -311,20 +404,29 @@ function markOneAsRead(id) {
   }
 }
 
-// Marquer toutes comme lues à l'ouverture du menu
-
-// Liste réactive des notifications lues
-const readNotifs = ref(getReadNotifs())
+// Marquer une notification histoire comme lue
+function markOneHistoireAsRead(id) {
+  const current = getReadHistoires()
+  if (!current.includes(id)) {
+    current.push(id)
+    localStorage.setItem(NOTIF_HISTOIRE_KEY, JSON.stringify(current))
+    readHistoires.value = current
+  }
+}
 
 // Notifications non lues
 const unreadRecentBooks = computed(() =>
   recentBooks.value.filter((o) => !readNotifs.value.includes(o.id_ouvrage)),
 )
-const unreadCount = computed(() => unreadRecentBooks.value.length)
+const unreadRecentHistoires = computed(() =>
+  recentHistoires.value.filter((h) => !readHistoires.value.includes(h.id_histoire)),
+)
+const unreadCount = computed(() => unreadRecentBooks.value.length + unreadRecentHistoires.value.length)
 
 // Synchronise readNotifs si localStorage change ailleurs
 window.addEventListener('storage', () => {
   readNotifs.value = getReadNotifs()
+  readHistoires.value = getReadHistoires()
 })
 
 // Adapter ici selon l'emplacement réel de tes images utilisateurs
@@ -341,6 +443,8 @@ onMounted(() => {
   if (storedUser) {
     user.value = JSON.parse(storedUser)
   }
+  // Charge les histoires si besoin
+  histoireStore.fetchHistoires()
 })
 
 const logout = () => {
