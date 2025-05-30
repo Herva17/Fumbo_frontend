@@ -16,12 +16,7 @@
         class="col-3"
       />
       <q-space />
-      <q-btn-toggle
-        v-model="sort"
-        toggle-color="primary"
-        flat
-        :options="toggleOptions"
-      />
+      <q-btn-toggle v-model="sort" toggle-color="primary" flat :options="toggleOptions" />
     </div>
 
     <div class="stories-list">
@@ -48,20 +43,20 @@
                   class="col-3"
                   :src="getFullUrl(ouvrage.user_image)"
                   :alt="ouvrage.titre_ouvrage"
-                  style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px;"
-                  :style="{ width: '40px', height: '40px', borderRadius: '50%', marginRight: '10px' }"
+                  style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px"
                 />
                 {{ ouvrage.username }} {{ ouvrage.prenom }}
                 <q-chip dense>{{ ouvrage.nom_nationalite }}</q-chip>
                 <q-badge color="primary" class="q-ml-sm">
-                  {{ abonnésCount[ouvrage.id_user || ouvrage.id_auteur] || 0 }} abonnés
+                  {{ abonnésCount[ouvrage.id_user] || 0 }} abonnés
                 </q-badge>
                 <q-btn
                   v-if="!isSelf(ouvrage)"
                   flat
                   dense
+                  :loading="ouvrage.loadingAbonnement"
                   :color="isAbonne(ouvrage) ? 'primary' : 'grey-7'"
-                  :label="isAbonne(ouvrage) ? 'Abonné' : 'S’abonner'"
+                  :label="isAbonne(ouvrage) ? 'Abonné' : 'S\'abonner'"
                   icon="person_add"
                   @click="toggleAbonnement(ouvrage)"
                   class="q-ml-sm"
@@ -81,7 +76,9 @@
                   color="primary"
                   text-color="white"
                   class="q-mr-xs"
-                >{{ tag }}</q-chip>
+                >
+                  {{ tag }}
+                </q-chip>
               </div>
               <div v-if="ouvrage.bio" class="q-mb-xs">
                 <q-btn
@@ -158,15 +155,17 @@
                 Auteur : {{ histoire.username }} {{ histoire.prenom }}
               </span>
               <q-chip dense class="q-ml-sm">{{ histoire.nom_nationalite }}</q-chip>
-              <q-badge color="primary" class="q-ml-sm">
-                {{ abonnésCount[histoire.id_user || histoire.id_auteur] || 0 }} abonnés
+              <q-badge color="primary" v-if="abonnésCount[histoire.id_user] !== undefined">
+                {{ abonnésCount[histoire.id_user] }} abonnés
               </q-badge>
+
               <q-btn
                 v-if="!isSelf(histoire)"
                 flat
                 dense
+                :loading="histoire.loadingAbonnement"
                 :color="isAbonne(histoire) ? 'primary' : 'grey-7'"
-                :label="isAbonne(histoire) ? 'Abonné' : 'S’abonner'"
+                :label="isAbonne(histoire) ? 'Abonné' : 'S\'abonner'"
                 icon="person_add"
                 @click="toggleAbonnement(histoire)"
                 class="q-ml-sm"
@@ -194,12 +193,7 @@
               <q-btn flat round icon="share" color="teal" @click="onShare(histoire)" />
             </div>
             <div class="q-mt-md">
-              <q-btn
-                flat
-                color="primary"
-                label="Lire l'histoire"
-                @click="showHistoire(histoire)"
-              />
+              <q-btn flat color="primary" label="Lire l'histoire" @click="showHistoire(histoire)" />
             </div>
           </q-card-section>
         </q-card>
@@ -226,6 +220,9 @@
             <div>
               {{ selectedOuvrage?.username }} {{ selectedOuvrage?.prenom }}
               <q-chip dense>{{ selectedOuvrage?.nom_nationalite }}</q-chip>
+              <q-badge color="primary" class="q-ml-sm">
+                {{ abonnésCount[selectedOuvrage?.id_user] || 0 }} abonnés
+              </q-badge>
             </div>
           </div>
           <div class="q-mb-md">
@@ -267,6 +264,9 @@
               Auteur : {{ selectedHistoire?.username }} {{ selectedHistoire?.prenom }}
             </span>
             <q-chip dense class="q-ml-sm">{{ selectedHistoire?.nom_nationalite }}</q-chip>
+            <q-badge color="primary" class="q-ml-sm">
+              {{ abonnésCount[selectedHistoire?.id_user] || 0 }} abonnés
+            </q-badge>
           </div>
           <div class="q-mb-md">
             <span class="text-caption text-grey-7" v-if="selectedHistoire?.personnages_principaux">
@@ -279,14 +279,10 @@
             </span>
           </div>
           <div class="q-mb-md">
-            <span class="text-caption text-grey-8">
-              Email : {{ selectedHistoire?.email }}
-            </span>
+            <span class="text-caption text-grey-8"> Email : {{ selectedHistoire?.email }} </span>
           </div>
           <div class="q-mb-md">
-            <span class="text-caption text-grey-8">
-              Bio : {{ selectedHistoire?.bio }}
-            </span>
+            <span class="text-caption text-grey-8"> Bio : {{ selectedHistoire?.bio }} </span>
           </div>
         </q-card-section>
         <q-card-actions align="right">
@@ -308,7 +304,6 @@
     />
   </q-page>
 </template>
-
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useQuasar } from 'quasar'
@@ -335,7 +330,7 @@ const toggleOptions = [
   { label: 'Recits', value: 'Recits' },
   { label: 'Contes', value: 'Contes' },
   { label: 'Romans', value: 'Romans' },
-  { label: 'Autres', value: 'Autres' }
+  { label: 'Autres', value: 'Autres' },
 ]
 
 const categorieStore = useCategorieStore()
@@ -348,73 +343,135 @@ const selectedOuvrage = ref(null)
 const selectedHistoire = ref(null)
 const showHistoireModal = ref(false)
 
-// Notification pour nouvelle histoire
 const showNotif = ref(false)
 const notifMessage = ref('')
 
-// Utilise le store pour la liste des abonnements et le nombre d'abonnés
-const abonnements = abonnementStore.abonnements
-const abonnésCount = abonnementStore.abonnésCount
+const abonnements = ref([])
+const abonnésCount = ref({})
 
-// Récupérer l'utilisateur courant depuis le localStorage
 const user = ref(null)
 onMounted(() => {
   const userData = localStorage.getItem('user')
   if (userData) {
     user.value = JSON.parse(userData)
+    if (user.value?.id) {
+      loadUserAbonnements()
+    }
   }
 })
 
-function isAbonne(item) {
-  return (abonnements.value || []).includes(item.id_user)
+// 🔄 Ajout - Fonction d’animation du compteur
+function animateCount(target, value) {
+  const duration = 1000
+  const frameRate = 20
+  const steps = Math.ceil(duration / frameRate)
+  const start = target.value || 0
+  const increment = (value - start) / steps
+
+  let current = start
+  let count = 0
+
+  const interval = setInterval(() => {
+    current += increment
+    count++
+    if (count >= steps || current >= value) {
+      target.value = value
+      clearInterval(interval)
+    } else {
+      target.value = Math.round(current)
+    }
+  }, frameRate)
 }
+
+async function loadUserAbonnements() {
+  try {
+    await abonnementStore.fetchAbonnements(user.value.id)
+    abonnements.value = abonnementStore.abonnements.map((a) => a.id_auteur)
+  } catch (error) {
+    $q.notify({
+      type: 'negative',
+      message: `Erreur lors du chargement des abonnements: ${error.message}`,
+    })
+  }
+}
+
+function isAbonne(item) {
+  return abonnements.value.includes(item.id_user)
+}
+
 function isSelf(item) {
-  return user.value && (String(user.value.id) === String(item.id_user))
+  return user.value && String(user.value.id) === String(item.id_user)
 }
 
 async function loadAbonnes(item) {
-  const id = item.id_user || item.id_auteur
-  if (id) {
-    await abonnementStore.compterAbonnesAuteur(id)
+  const idAuteur = item.id_user
+  if (!idAuteur || abonnésCount.value[idAuteur] !== undefined) return
+
+  try {
+    await abonnementStore.compterAbonnesAuteur(idAuteur)
+    const count = abonnementStore.abonnésCount[idAuteur] || 0
+    if (!abonnésCount.value[idAuteur]) {
+      abonnésCount.value[idAuteur] = 0
+    }
+    animateCount(ref(abonnésCount.value[idAuteur]), count) // 🔄 Ajout
+  } catch (error) {
+    console.error('Erreur lors du chargement des abonnés:', error)
   }
 }
 
 async function toggleAbonnement(item) {
   const idAuteur = item.id_user
   const idAbonne = user.value?.id
+
   if (!idAuteur || !idAbonne) {
     $q.notify({ type: 'negative', message: "Aucun auteur ou abonné trouvé pour l'abonnement" })
     return
   }
-  if (isAbonne(item)) {
-    abonnements.value = abonnements.value.filter(a => a !== idAuteur)
-    $q.notify({ type: 'info', message: `Désabonné de ${item.username} ${item.prenom}` })
-    await loadAbonnes(item)
-  } else {
-    const res = await abonnementStore.ajouterAbonnement(idAuteur, idAbonne)
-    if (res && res.succes) {
-      if (!abonnements.value.includes(idAuteur)) {
-        abonnements.value.push(idAuteur)
+
+  item.loadingAbonnement = true
+
+  try {
+    if (isAbonne(item)) {
+      const success = await abonnementStore.supprimerAbonnement(idAuteur, idAbonne)
+      if (success) {
+        abonnements.value = abonnements.value.filter((id) => id !== idAuteur)
+        $q.notify({ type: 'info', message: `Désabonné de ${item.username} ${item.prenom}` })
+
+        const oldCount = abonnésCount.value[idAuteur] || 1
+        animateCount(ref(abonnésCount.value[idAuteur]), oldCount - 1) // 🔄 Ajout
       }
-      $q.notify({ type: 'positive', message: 'Abonnement ajouté' })
-      await loadAbonnes(item)
     } else {
-      $q.notify({ type: 'negative', message: res?.message || "Erreur lors de l'abonnement" })
+      const success = await abonnementStore.ajouterAbonnement(idAuteur, idAbonne)
+      if (success) {
+        abonnements.value.push(idAuteur)
+        $q.notify({ type: 'positive', message: `Abonné à ${item.username} ${item.prenom}` })
+
+        const oldCount = abonnésCount.value[idAuteur] || 0
+        animateCount(ref(abonnésCount.value[idAuteur]), oldCount + 1) // 🔄 Ajout
+      }
     }
+  } catch (error) {
+    $q.notify({
+      type: 'negative',
+      message: error.message || "Erreur lors de l'opération d'abonnement",
+    })
+  } finally {
+    item.loadingAbonnement = false
   }
 }
 
 function showBio(ouvrage) {
   selectedOuvrage.value = ouvrage
   showBioModal.value = true
+  loadAbonnes(ouvrage)
 }
 
 function showHistoire(histoire) {
   selectedHistoire.value = histoire
   showHistoireModal.value = true
+  loadAbonnes(histoire)
 }
 
-// Simule la notification lors de la publication d'une histoire
 function notifyNewHistoire(histoire) {
   notifMessage.value = `Nouvelle histoire publiée : "${histoire.titre}" par ${histoire.username} ${histoire.prenom}`
   showNotif.value = true
@@ -465,9 +522,8 @@ function timeSince(dateString) {
 onMounted(async () => {
   await categorieStore.fetchCategories()
   let rawCategories = categorieStore.categories?.response
-  if (!Array.isArray(rawCategories)) {
-    rawCategories = []
-  }
+  if (!Array.isArray(rawCategories)) rawCategories = []
+
   filterOptions.value = [
     'Tous',
     ...rawCategories.map((cat) => cat.nom_categorie || cat.label || cat.nom || 'Catégorie'),
@@ -475,7 +531,19 @@ onMounted(async () => {
 
   await ouvrageStore.fetchOuvrages()
   await histoireStore.fetchHistoires()
-  // Notification si nouvelle histoire (exemple : la dernière du tableau)
+
+  const initialAuthors = [
+    ...ouvrageStore.ouvrages.slice(0, 5).map((o) => o.id_user),
+    ...histoireStore.histoires.slice(0, 5).map((h) => h.id_user),
+  ].filter((id, index, self) => id && self.indexOf(id) === index)
+
+  await Promise.all(initialAuthors.map((id) => abonnementStore.compterAbonnesAuteur(id)))
+  for (const id of initialAuthors) {
+    const count = abonnementStore.abonnésCount[id] || 0
+    abonnésCount.value[id] = 0
+    animateCount(ref(abonnésCount.value[id]), count) // 🔄 Ajout
+  }
+
   if (histoireStore.histoires.length > 0) {
     notifyNewHistoire(histoireStore.histoires[histoireStore.histoires.length - 1])
   }
@@ -484,20 +552,19 @@ onMounted(async () => {
 const filteredOuvrages = computed(() => {
   let list = ouvrageStore.ouvrages
   if (filter.value && filter.value !== 'Tous') {
-    list = list.filter(o =>
-      o.nom_categorie && o.nom_categorie.toLowerCase() === filter.value.toLowerCase()
+    list = list.filter(
+      (o) => o.nom_categorie && o.nom_categorie.toLowerCase() === filter.value.toLowerCase(),
     )
   }
   return list
 })
 
-// Filtrage par catégorie pour les histoires
 const filteredHistoires = computed(() => {
   let list = histoireStore.histoires
   if (!Array.isArray(list)) return []
   if (filter.value && filter.value !== 'Tous') {
-    list = list.filter(h =>
-      h.nom_categorie && h.nom_categorie.toLowerCase() === filter.value.toLowerCase()
+    list = list.filter(
+      (h) => h.nom_categorie && h.nom_categorie.toLowerCase() === filter.value.toLowerCase(),
     )
   }
   return list
@@ -534,4 +601,87 @@ function onShare(item) {
   font-size: 1rem;
   color: #444;
 }
+.story-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  background-color: #ffffff;
+  overflow: hidden;
+}
+
+.story-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.story-card q-img {
+  border-radius: 12px 0 0 12px;
+  object-fit: cover;
+}
+
+.ouvrage-title {
+  font-weight: 600;
+  color: #1976d2; /* Couleur primaire Quasar */
+}
+
+.story-description {
+  color: #555;
+  line-height: 1.5;
+  margin-top: 8px;
+  max-height: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.q-chip {
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-right: 6px;
+}
+
+.q-btn {
+  min-width: 100px;
+}
+
+.q-btn[flat] {
+  font-weight: 600;
+}
+
+.row.q-mt-sm {
+  gap: 12px;
+}
+
+.stories-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 0 12px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .story-card q-card-section.horizontal {
+    flex-direction: column !important;
+  }
+  .story-card q-img {
+    border-radius: 12px 12px 0 0;
+    width: 100% !important;
+    height: 200px !important;
+  }
+}
+.stories-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* centre horizontalement */
+  justify-content: center; /* centre verticalement */
+  min-height: 80vh; /* optionnel : pour que le conteneur prenne presque toute la hauteur de la page */
+  padding: 20px;
+}
+
+.story-card {
+  width: 90%;       /* ou une largeur fixe comme 600px selon ton design */
+  max-width: 800px; /* limite max largeur pour éviter que ça soit trop large */
+  margin-bottom: 20px;
+}
+
 </style>
