@@ -40,6 +40,9 @@
         <!-- Colonne gauche -->
         <div class="col-12 col-md-6">
           <br />
+          <div class="text-caption text-grey-8 q-mb-xs">
+            Entrez le nom complet de votre livre.
+          </div>
           <q-input
             v-model="book.titre_ouvrage"
             label="Titre de l'ouvrage *"
@@ -49,17 +52,9 @@
             :rules="[(val) => !!val || 'Ce champ est obligatoire']"
             bg-color="grey-2"
           />
-          <!-- <q-input
-            v-model="book.id_user"
-            label="Auteur (ID) *"
-            dense
-            outlined
-            class="q-mt-md"
-            lazy-rules
-            :rules="[(val) => !!val || 'Ce champ est obligatoire']"
-            bg-color="grey-2"
-            readonly
-          /> -->
+          <div class="text-caption text-grey-8 q-mt-md q-mb-xs">
+            Sélectionnez le genre ou la catégorie de votre ouvrage.
+          </div>
           <q-select
             v-model="book.id_categorie"
             label="Catégorie *"
@@ -68,49 +63,61 @@
             outlined
             emit-value
             map-options
-            class="q-mt-md"
+            class="q-mt-none"
             lazy-rules
             :rules="[(val) => !!val || 'Ce champ est obligatoire']"
             bg-color="grey-2"
           />
+          <div class="text-caption text-grey-8 q-mt-md q-mb-xs">
+            Indiquez l'année où le livre a été publié ou écrit.
+          </div>
           <q-input
             v-model="book.annee_publication"
             label="Année de publication *"
             type="number"
             dense
             outlined
-            class="q-mt-md"
+            class="q-mt-none"
             lazy-rules
             :rules="[(val) => !!val || 'Ce champ est obligatoire']"
             bg-color="grey-2"
           />
+          <div class="text-caption text-grey-8 q-mt-md q-mb-xs">
+            Précisez la langue principale du livre (ex : Français, Anglais...).
+          </div>
           <q-input
             v-model="book.langue"
             label="Langue *"
             dense
             outlined
-            class="q-mt-md"
+            class="q-mt-none"
             lazy-rules
             :rules="[(val) => !!val || 'Ce champ est obligatoire']"
             bg-color="grey-2"
           />
+          <div class="text-caption text-grey-8 q-mt-md q-mb-xs">
+            Saisissez le numéro ISBN si disponible (sinon laissez vide ou mettez "-").
+          </div>
           <q-input
             v-model="book.isbn"
             label="ISBN *"
             dense
             outlined
-            class="q-mt-md"
+            class="q-mt-none"
             lazy-rules
             :rules="[(val) => !!val || 'Ce champ est obligatoire']"
             bg-color="grey-2"
           />
+          <div class="text-caption text-grey-8 q-mt-md q-mb-xs">
+            Un court résumé de l'ouvrage (500 caractères max).
+          </div>
           <q-input
             v-model="book.resume"
             label="Résumé"
             type="textarea"
             outlined
             autogrow
-            class="q-mt-md"
+            class="q-mt-none"
             dense
             counter
             maxlength="500"
@@ -121,27 +128,36 @@
         <!-- Colonne droite -->
 
         <div class="col-12 col-md-6">
+          <div class="text-caption text-grey-8 q-mb-xs">
+            Indiquez le format du fichier à publier (ex : PDF, EPUB...).
+          </div>
           <q-input
             v-model="book.format"
             label="Format (ex: PDF, EPUB) *"
             dense
             outlined
-            class="q-mt-md"
+            class="q-mt-none"
             lazy-rules
             :rules="[(val) => !!val || 'Ce champ est obligatoire']"
             bg-color="grey-2"
           />
+          <div class="text-caption text-grey-8 q-mt-md q-mb-xs">
+            Entrez le nombre total de pages du livre.
+          </div>
           <q-input
             v-model="book.Nb_pages"
             label="Nombre de pages *"
             type="number"
             dense
             outlined
-            class="q-mt-md"
+            class="q-mt-none"
             lazy-rules
             :rules="[(val) => !!val || 'Ce champ est obligatoire']"
             bg-color="grey-2"
           />
+          <div class="text-caption text-grey-8 q-mt-md q-mb-xs">
+            Ajoutez des mots-clés pour décrire le contenu (ex : aventure, poésie...).
+          </div>
           <q-input
             v-model="book.tags"
             label="Mots-clés"
@@ -152,26 +168,31 @@
             multiple
             input-debounce="0"
             new-value-mode="add"
-            class="q-mt-md"
+            class="q-mt-none"
             bg-color="grey-2"
             @new-value="createTag"
           />
-          <br />
+          <div class="text-caption text-grey-8 q-mt-md q-mb-xs">
+            Téléchargez une image qui représentera la couverture du livre.
+          </div>
           <q-file
             v-model="coverFile"
             label="Image de couverture *"
             accept="image/*"
             outlined
             dense
-            class="q-mt-md"
+            class="q-mt-none"
             :rules="[(val) => !!val || 'Ce champ est obligatoire']"
           />
+          <div class="text-caption text-grey-8 q-mt-md q-mb-xs">
+            Ajoutez le fichier principal du livre (PDF, DOCX...).
+          </div>
           <q-file
             v-model="bookFile"
             label="Fichier de l'ouvrage * (.pdf, .docx)"
             outlined
             dense
-            class="q-mt-md"
+            class="q-mt-none"
             accept=".pdf,.doc,.docx"
             bg-color="grey-2"
             lazy-rules

@@ -67,25 +67,32 @@
           <q-btn flat dense icon="close" @click="toggleOptions" aria-label="Fermer le panneau" />
         </div>
 
-        <q-form @submit="saveDetails" class="details-form">
+        <q-form @submit.prevent="handleSave" class="details-form">
+    
+
+          <q-select
+            v-model="storyDetails.categorieId"
+            :options="categoriesOptions"
+            label="Catégorie"
+            filled
+            clearable
+            :loading="categorieStore.loading"
+            :error="!!categorieStore.error"
+            :error-message="categorieStore.error ? 'Erreur de chargement des catégories' : ''"
+            option-label="nom_categorie"
+            option-value="id_categorie"
+          />
+
           <q-input
-            v-model="storyDetails.title"
+            v-model="storyDetails.titre"
             label="Titre de l'histoire"
             filled
             clearable
             :rules="[(val) => !!val || 'Le titre est requis']"
           />
 
-          <q-select
-            v-model="storyDetails.category"
-            :options="categories"
-            label="Catégorie"
-            filled
-            clearable
-          />
-
           <q-input
-            v-model="storyDetails.mainCharacters"
+            v-model="storyDetails.personnages_principaux"
             label="Personnages principaux (séparés par des virgules)"
             filled
             clearable
@@ -100,7 +107,14 @@
             autogrow
           />
 
-          <q-toggle v-model="storyDetails.isPublic" label="Rendre cette histoire publique" />
+          <q-input
+            v-model="storyDetails.histoire"
+            label="Votre histoire"
+            filled
+            clearable
+            type="textarea"
+            autogrow
+          />
 
           <div class="form-actions">
             <q-btn label="Enregistrer" type="submit" color="primary" :loading="isSaving" />
@@ -111,8 +125,8 @@
 
       <div class="editor-content" role="region" aria-label="Éditeur de texte">
         <div class="editor-header">
-          <h1 class="title" v-if="!storyDetails.title">Raconter votre histoire...</h1>
-          <h1 class="title" v-else>{{ storyDetails.title }}</h1>
+          <h1 class="title" v-if="!storyDetails.titre">Raconter votre histoire...</h1>
+          <h1 class="title" v-else>{{ storyDetails.titre }}</h1>
 
           <div class="word-count">
             <q-chip dense>{{ wordCount }} mots</q-chip>
@@ -122,7 +136,7 @@
 
         <q-scroll-area style="height: calc(100% - 100px)">
           <q-input
-            v-model="story"
+            v-model="storyDetails.histoire"
             placeholder="Commencer à raconter une histoire..."
             aria-label="Zone de texte pour raconter une histoire"
             type="textarea"
@@ -171,15 +185,51 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, watch, onBeforeUnmount } from 'vue'
 import { useQuasar, date } from 'quasar'
 import jsPDF from 'jspdf'
 import HeaderPage from '../components/HeaderPage.vue'
-
+import { useCategorieStore } from '../stores/categorie'
+import { useSaveHistoireStore } from '../stores/SaveHistoire'
+import { useRouter } from 'vue-router'
 const $q = useQuasar()
+const categorieStore = useCategorieStore()
+const saveHistoireStore = useSaveHistoireStore()
 
-// Réactives
-const story = ref('')
+// Récupérer l'utilisateur depuis le localStorage/session
+const user = ref({
+  id_user: '',
+})
+onMounted(() => {
+  const storedUser = localStorage.getItem('user')
+  if (storedUser) {
+    user.value = JSON.parse(storedUser)
+  }
+  categorieStore.fetchCategories()
+  loadStoryFromLocalStorage()
+  // Toujours forcer l'id_user après le chargement local
+  storyDetails.value.id_user = user.value.id_user || user.value.id || '' 
+  saveInterval.value = setInterval(() => {
+    if (autoSave.value && (storyDetails.value.histoire || storyDetails.value.titre)) {
+      saveStoryToLocalStorage()
+    }
+  }, 30000)
+})
+
+onBeforeUnmount(() => {
+  clearInterval(saveInterval.value)
+})
+
+const categoriesOptions = computed(() => {
+  if (Array.isArray(categorieStore.categories)) {
+    return categorieStore.categories
+  }
+  if (categorieStore.categories && Array.isArray(categorieStore.categories.response)) {
+    return categorieStore.categories.response
+  }
+  return []
+})
+
 const showOptions = ref(true)
 const autoSave = ref(true)
 const isSaving = ref(false)
@@ -188,61 +238,28 @@ const showShareDialog = ref(false)
 const shareUrl = ref('')
 
 const storyDetails = ref({
-  title: '',
+  id_user: '', // sera rempli au montage
+  categorieId: '',
+  titre: '',
+  personnages_principaux: '',
   description: '',
-  mainCharacters: '',
-  category: '',
-  isPublic: false,
+  histoire: '',
 })
-
-const categories = [
-  'Aventure',
-  'Romance',
-  'Science-Fiction',
-  'Fantasy',
-  'Mystère',
-  'Horreur',
-  'Historique',
-  'Contemporain',
-]
-
-// Computed
-const wordCount = computed(() => {
-  return story.value ? story.value.trim().split(/\s+/).length : 0
-})
-
-const characterCount = computed(() => {
-  return story.value ? story.value.length : 0
-})
-
-// Watchers
-watch(story, () => {
-  handleAutoSave()
-})
-
 watch(
-  storyDetails,
+  () => storyDetails.value,
   () => {
     handleAutoSave()
   },
   { deep: true },
 )
-
-// Lifecycle hooks
-onMounted(() => {
-  loadStoryFromLocalStorage()
-  saveInterval.value = setInterval(() => {
-    if (autoSave.value && (story.value || storyDetails.value.title)) {
-      saveStoryToLocalStorage()
-    }
-  }, 30000) // Sauvegarde toutes les 30 secondes
+const wordCount = computed(() => {
+  return storyDetails.value.histoire ? storyDetails.value.histoire.trim().split(/\s+/).length : 0
 })
 
-onBeforeUnmount(() => {
-  clearInterval(saveInterval.value)
+const characterCount = computed(() => {
+  return storyDetails.value.histoire ? storyDetails.value.histoire.length : 0
 })
 
-// Methods
 const saveInterval = ref(null)
 
 const handleAutoSave = () => {
@@ -265,28 +282,46 @@ const toggleAutoSave = () => {
     })
   }
 }
+const router = useRouter()
 
-const saveDetails = async () => {
+const handleSave = async () => {
   isSaving.value = true
-  try {
-    await saveStoryToLocalStorage()
-    $q.notify({
-      message: 'Détails sauvegardés avec succès',
-      color: 'positive',
-      icon: 'check_circle',
-    })
-  } catch (error) {
-    console.error('Erreur lors de la sauvegarde:', error)
-    $q.notify({
-      message: 'Erreur lors de la sauvegarde: ' + error.message,
-      color: 'negative',
-      icon: 'error',
-    })
-  } finally {
-    isSaving.value = false
+  // N’envoie QUE les champs attendus par l’API
+  const payload = {
+    id_user: storyDetails.value.id_user,
+    categorieId: typeof storyDetails.value.categorieId === 'object'
+      ? storyDetails.value.categorieId.id_categorie
+      : storyDetails.value.categorieId,
+    titre: storyDetails.value.titre,
+    personnages_principaux: storyDetails.value.personnages_principaux,
+    description: storyDetails.value.description,
+    histoire: storyDetails.value.histoire
+  }
+ 
+  const response = await saveHistoireStore.saveHistoire(payload)
+  console.log('Réponse API:', response)
+  isSaving.value = false
+  if (saveHistoireStore.error) {
+    $q.notify({ type: 'negative', message: 'Erreur lors de la sauvegarde' })
+  } else {
+    $q.notify({ type: 'positive', message: 'Histoire enregistrée avec succès' })
+    clearFormAndRedirect()
   }
 }
 
+// Fonction pour vider les champs et rediriger
+const clearFormAndRedirect = () => {
+  storyDetails.value = {
+    id_user: user.value.id || '',
+    categorieId: '',
+    titre: '',
+    personnages_principaux: '',
+    description: '',
+    histoire: '',
+  }
+  // Redirection vers la route "ecrire"
+   router.push('/ecrire') // Assure-toi que la route s'appelle bien 'ecrire'
+}
 const resetDetails = () => {
   $q.dialog({
     title: 'Confirmation',
@@ -295,11 +330,12 @@ const resetDetails = () => {
     persistent: true,
   }).onOk(() => {
     storyDetails.value = {
-      title: '',
+      id_user: user.value.id || '',
+      categorieId: '',
+      titre: '',
+      personnages_principaux: '',
       description: '',
-      mainCharacters: '',
-      category: '',
-      isPublic: false,
+      histoire: '',
     }
   })
 }
@@ -314,7 +350,7 @@ const exportToPDF = async () => {
 
     doc.setFontSize(20)
     doc.setTextColor(33, 150, 243)
-    doc.text(storyDetails.value.title || 'Sans titre', 105, 20, { align: 'center' })
+    doc.text(storyDetails.value.titre || 'Sans titre', 105, 20, { align: 'center' })
 
     if (storyDetails.value.description) {
       doc.setFontSize(12)
@@ -324,16 +360,16 @@ const exportToPDF = async () => {
 
     doc.setFontSize(14)
     doc.setTextColor(0, 0, 0)
-    const lines = doc.splitTextToSize(story.value, 180)
+    const lines = doc.splitTextToSize(storyDetails.value.histoire, 180)
     doc.text(lines, 15, 50)
 
     doc.setProperties({
-      title: storyDetails.value.title || 'Histoire sans titre',
+      title: storyDetails.value.titre || 'Histoire sans titre',
       author: 'Thierry Nirere',
       creator: "Éditeur d'histoires",
     })
 
-    doc.save(`${storyDetails.value.title || 'histoire'}.pdf`)
+    doc.save(`${storyDetails.value.titre || 'histoire'}.pdf`)
   } catch (error) {
     console.error('Erreur lors de la génération du PDF:', error)
     $q.notify({
@@ -347,7 +383,7 @@ const exportToPDF = async () => {
 }
 
 const generateShareLink = async () => {
-  if (!storyDetails.value.title) {
+  if (!storyDetails.value.titre) {
     $q.notify({
       message: 'Veuillez donner un titre à votre histoire avant de partager',
       color: 'warning',
@@ -360,9 +396,9 @@ const generateShareLink = async () => {
 
   try {
     const shareData = {
-      title: storyDetails.value.title,
+      titre: storyDetails.value.titre,
       description: storyDetails.value.description,
-      story: story.value,
+      histoire: storyDetails.value.histoire,
       author: 'Thierry Nirere',
       createdAt: new Date().toISOString(),
     }
@@ -404,7 +440,6 @@ const saveStoryToLocalStorage = async () => {
   isSaving.value = true
   try {
     const storyData = {
-      story: story.value,
       details: storyDetails.value,
       lastSaved: new Date().toISOString(),
     }
@@ -427,13 +462,13 @@ const loadStoryFromLocalStorage = () => {
     const savedStory = localStorage.getItem('savedStory')
     if (savedStory) {
       const parsedData = JSON.parse(savedStory)
-      story.value = parsedData.story
       storyDetails.value = parsedData.details || {
-        title: '',
+        id_user: user.value.id || '',
+        categorieId: '',
+        titre: '',
+        personnages_principaux: '',
         description: '',
-        mainCharacters: '',
-        category: '',
-        isPublic: false,
+        histoire: '',
       }
       lastSaved.value = parsedData.lastSaved ? new Date(parsedData.lastSaved) : null
     }
@@ -465,7 +500,6 @@ const handleKeyDown = (e) => {
 }
 
 const publishStory = () => {
-  // Implémentez cette fonction selon vos besoins
   $q.notify({
     message: 'Fonctionnalité de publication à implémenter',
     color: 'info',

@@ -1,123 +1,150 @@
 <template>
   <q-page class="register-page flex flex-center">
-    <q-card class="q-pa-md q-card-shadow animated-card">
-      <!-- Affichage du message de succès en haut -->
-     <q-dialog v-model="showSuccessModal" persistent>
-        <q-card class="text-center success-card">
-          <q-card-section>
-            <q-icon name="thumb_up" size="50px" color="green" />
-            <div class="text-h6 text-positive q-mt-sm">Votre compte a été créé avec succès !</div>
-            <div class="text-caption q-mt-sm">Veiller vous connectez avec votre email</div>
-            <q-spinner-dots size="40px" color="primary" class="q-mt-md" />
-          </q-card-section>
-        </q-card>
-      </q-dialog>
+    <div class="register-scroll-area">
+      <q-card class="q-pa-md q-card-shadow animated-card">
+        <!-- Affichage du message de succès en haut -->
+        <q-dialog v-model="showSuccessModal" persistent>
+          <q-card class="text-center success-card">
+            <q-card-section>
+              <q-icon name="thumb_up" size="50px" color="green" />
+              <div class="text-h6 text-positive q-mt-sm">Votre compte a été créé avec succès !</div>
+              <div class="text-caption q-mt-sm">Veiller vous connectez avec votre email</div>
+              <q-spinner-dots size="40px" color="primary" class="q-mt-md" />
+            </q-card-section>
+          </q-card>
+        </q-dialog>
 
-      <!-- Titre -->
-      <q-card-section>
-        <div class="text-h4 text-center text-primary q-mb-sm">Créez un compte</div>
-      </q-card-section>
+        <!-- Titre et description motivationnelle -->
+        <q-card-section>
+          <div class="text-h4 text-center text-primary q-mb-sm">Créez un compte</div>
+          <div class="text-center text-grey-8 q-mb-md" style="font-size: 16px;">
+            Rejoignez la communauté Fumbo et partagez vos histoires, découvrez des ouvrages uniques, échangez avec d'autres passionnés et accédez à des livres gratuits ou exclusifs.<br>
+            <span class="text-primary text-weight-bold">Publiez, lisez, inspirez et soyez inspiré !</span>
+          </div>
+        </q-card-section>
 
-      <!-- Formulaire d'inscription -->
-      <q-card-section>
-        <q-form @submit="register" ref="formRef">
-          <q-input
-            v-model="form.username"
-            label="Nom"
-            outlined
-            dense
-            class="q-mb-md"
-            :rules="[(val) => !!val || 'Le nom est requis']"
-          />
-          <q-input
-            v-model="form.prenom"
-            label="Prénom"
-            outlined
-            dense
-            class="q-mb-md"
-            :rules="[(val) => !!val || 'Le prénom est requis']"
-          />
-          <q-input
-            v-model="form.email"
-            label="Email"
-            type="email"
-            outlined
-            dense
-            class="q-mb-md"
-            :rules="[validateEmail]"
-          />
-          <q-input
-            v-model="form.password"
-            label="Mot de passe"
-            :type="showPassword ? 'text' : 'password'"
-            outlined
-            dense
-            class="q-mb-md"
-          >
-            <template v-slot:append>
-              <q-icon
-                :name="showPassword ? 'visibility_off' : 'visibility'"
-                class="cursor-pointer"
-                @click="togglePasswordVisibility"
-              />
-            </template>
-          </q-input>
-          <q-input
-            v-model="form.bio"
-            label="Biographie"
-            outlined
-            dense
-            class="q-mb-md"
-          />
-          <q-uploader
-            v-model="form.image"
-            label="Télécharger une image"
-            outlined
-            dense
-            class="q-mb-md"
-            accept="image/*"
-            @added="onImageAdded"
-          />
-          <q-select
-            v-model="form.id_nationalite"
-            label="Nationalité"
-            outlined
-            dense
-            :options="nationalites"
-            option-label="nom_nationalite"
-            option-value="id_nationalite"
-            emit-value
-            map-options
-          >
-            <template v-slot:option="scope">
-              <q-item v-bind="scope.itemProps">
-                <q-item-section avatar>
-                  <q-img
-                    :src="getFullImageUrl(scope.opt.image)"
-                    style="width: 24px; height: 16px; border-radius: 50px;"
-                    alt="Image de la nationalité"
-                  />
-                </q-item-section>
-                <q-item-section>
-                  {{ scope.opt.nom_nationalite }}
-                </q-item-section>
-              </q-item>
-            </template>
-          </q-select>
-          <q-btn
-            label="S'inscrire"
-            type="submit"
-            color="primary"
-            unelevated
-            class="full-width q-mt-md"
-            :loading="isLoading"
-          />
-        </q-form>
+        <!-- Formulaire d'inscription -->
+        <q-card-section>
+          <q-form @submit="register" ref="formRef">
+            <div class="text-caption text-grey-7 q-mb-xs">
+              Votre nom d'auteur pour être reconnu par la communauté.
+            </div>
+            <q-input
+              v-model="form.username"
+              label="Nom"
+              outlined
+              dense
+              class="q-mb-md"
+              :rules="[(val) => !!val || 'Le nom est requis']"
+            />
+            <div class="text-caption text-grey-7 q-mb-xs">
+              Votre prénom pour personnaliser votre profil.
+            </div>
+            <q-input
+              v-model="form.prenom"
+              label="Prénom"
+              outlined
+              dense
+              class="q-mb-md"
+              :rules="[(val) => !!val || 'Le prénom est requis']"
+            />
+            <div class="text-caption text-grey-7 q-mb-xs">
+              Utilisez une adresse email valide pour recevoir les notifications et sécuriser votre compte.
+            </div>
+            <q-input
+              v-model="form.email"
+              label="Email"
+              type="email"
+              outlined
+              dense
+              class="q-mb-md"
+              :rules="[validateEmail]"
+            />
+            <div class="text-caption text-grey-7 q-mb-xs">
+              Choisissez un mot de passe sécurisé pour protéger votre compte.
+            </div>
+            <q-input
+              v-model="form.password"
+              label="Mot de passe"
+              :type="showPassword ? 'text' : 'password'"
+              outlined
+              dense
+              class="q-mb-md"
+            >
+              <template v-slot:append>
+                <q-icon
+                  :name="showPassword ? 'visibility_off' : 'visibility'"
+                  class="cursor-pointer"
+                  @click="togglePasswordVisibility"
+                />
+              </template>
+            </q-input>
+            <div class="text-caption text-grey-7 q-mb-xs">
+              Présentez-vous en quelques mots pour que les autres membres puissent mieux vous connaître.
+            </div>
+            <q-input
+              v-model="form.bio"
+              label="Biographie"
+              outlined
+              dense
+              class="q-mb-md"
+            />
+            <div class="text-caption text-grey-7 q-mb-xs">
+              Ajoutez une photo de profil pour personnaliser votre compte.
+            </div>
+            <q-uploader
+              v-model="form.image"
+              label="Télécharger une image"
+              outlined
+              dense
+              class="q-mb-md"
+              accept="image/*"
+              @added="onImageAdded"
+            />
+            <div class="text-caption text-grey-7 q-mb-xs">
+              Sélectionnez votre nationalité pour enrichir votre profil et découvrir des ouvrages de votre pays.
+            </div>
+            <q-select
+              v-model="form.id_nationalite"
+              label="Nationalité"
+              outlined
+              dense
+              :options="nationalites"
+              option-label="nom_nationalite"
+              option-value="id_nationalite"
+              emit-value
+              map-options
+            >
+              <template v-slot:option="scope">
+                <q-item v-bind="scope.itemProps">
+                  <q-item-section avatar>
+                    <q-img
+                      :src="getFullUrl(scope.opt.image)"
+                      style="width: 24px; height: 16px; border-radius: 50px;"
+                      alt="Image de la nationalité"
+                    />
+                  </q-item-section>
+                  <q-item-section>
+                    {{ scope.opt.nom_nationalite }}
+                  </q-item-section>
+                </q-item>
+              </template>
+            </q-select>
+            <q-btn
+              label="S'inscrire"
+              type="submit"
+              color="primary"
+              unelevated
+              class="full-width q-mt-md"
+              :loading="isLoading"
+            />
+          </q-form>
 
-        <!-- Affichage des messages d'erreur -->
-        <div v-if="error" class="text-negative q-mt-md">{{ error }}</div>
-      </q-card-section>
-    </q-card>
+          <!-- Affichage des messages d'erreur -->
+          <div v-if="error" class="text-negative q-mt-md">{{ error }}</div>
+        </q-card-section>
+      </q-card>
+    </div>
   </q-page>
 </template>
 
@@ -132,10 +159,14 @@ const inscriptionStore = useInscriptionStore()
 const nationalitesStore = useNationalitesStore()
 const router = useRouter()
 
-// Fonction pour compléter l'URL de l'image
-const getFullImageUrl = (imagePath) => {
-  const baseUrl = 'http://localhost/Api_Bibliotheque/uploads/nationalites/' // Remplacez par votre domaine
-  return imagePath.startsWith('http') ? imagePath : `${baseUrl}${imagePath}`
+// Chemin de base pour les fichiers/images (adapte si besoin)
+const BASE_URL = 'http://localhost/'
+
+// Fonction utilitaire pour corriger les chemins relatifs
+function getFullUrl(path) {
+  if (!path) return '/img/default-book.jpg'
+  if (path.startsWith('http')) return path
+  return BASE_URL + path.replace(/^(\.\.\/)+/, '')
 }
 
 // Fonction pour échapper les caractères spéciaux HTML
@@ -237,38 +268,52 @@ const resetMessages = () => {
   inscriptionStore.successMessage = null
 }
 </script>
+
 <style scoped>
-/* Style général */
 .register-page {
-  height: 100vh;
+  min-height: 100vh;
+  min-width: 100vw;
+  background: linear-gradient(135deg, #2575fc, #cbcbcb);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 0;
+  /* Le scroll sera sur la page entière */
+  overflow-y: auto;
+  overflow-x: hidden; /* Empêche la barre de scroll horizontale */
 }
 
-/* Style de la carte */
+.register-scroll-area {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 0;
+  /* Pas de scroll ici */
+  overflow: visible;
+}
+
 .q-card-shadow {
-  width: 450px;
+  max-width: 450px;
   border-radius: 16px;
   background-color: #ffffff;
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
   transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
   padding: 20px;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Animation au survol */
 .animated-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 16px 32px rgba(0, 0, 0, 0.4);
 }
 
-/* Bouton pleine largeur */
 .full-width {
   width: 100%;
 }
 
-/* Style des messages d'erreur et de succès */
 .text-negative {
   color: #e53935;
   font-weight: bold;
@@ -281,7 +326,6 @@ const resetMessages = () => {
   text-align: center;
 }
 
-/* Style de la carte de succès */
 .success-card {
   border: 1px solid #43a047;
   background-color: #e8f5e9;
@@ -289,7 +333,6 @@ const resetMessages = () => {
   padding: 20px;
 }
 
-/* Icône de visibilité */
 .cursor-pointer {
   cursor: pointer;
 }
