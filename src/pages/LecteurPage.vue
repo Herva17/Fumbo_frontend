@@ -1,34 +1,72 @@
 <template>
   <q-page class="dashboard-page bg-grey-1">
-    <!-- Header amélioré avec transitions -->
     <HeaderPage />
-    <!-- Lecteur audio amélioré -->
-    <div class="audio-player-container bg-white shadow-5">
-      <!-- Visualiseur audio -->
-      <div class="audio-visualizer" ref="visualizer">
+    <div class="media-player-container bg-white shadow-5">
+      <!-- Onglets pour basculer entre audio et vidéo -->
+      <q-tabs
+        v-model="mediaType"
+        dense
+        class="text-grey-7"
+        active-color="primary"
+        indicator-color="primary"
+        align="justify"
+        narrow-indicator
+      >
+        <q-tab name="audio" icon="audiotrack" label="Audio" />
+        <q-tab name="video" icon="videocam" label="Vidéo" />
+        <q-tab name="podcast" icon="podcasts" label="Podcasts" />
+      </q-tabs>
+
+      <!-- Lecteur vidéo (visible uniquement pour le type vidéo) -->
+      <div v-if="mediaType === 'video'" class="video-container q-mb-md">
+        <video
+          ref="videoPlayer"
+          class="video-player"
+          :src="currentVideo.src"
+          controls
+          @timeupdate="updateVideoProgress"
+          @loadedmetadata="updateVideoDuration"
+          @ended="handleVideoEnd"
+        ></video>
+      </div>
+
+      <!-- Visualiseur audio (visible uniquement pour le type audio/podcast) -->
+      <div v-if="mediaType !== 'video'" class="audio-visualizer" ref="visualizer">
         <canvas v-show="isPlaying" class="full-width"></canvas>
       </div>
 
       <!-- Contrôles principaux -->
       <div class="player-section row items-center">
         <!-- Couverture et infos -->
-        <div class="track-cover col-md-3 col-sm-12 text-center">
-          <q-img :src="currentAudio.cover" class="cover-img shadow-3" ratio="1" />
+        <div class="media-cover col-md-3 col-sm-12 text-center">
+          <q-img
+            :src="currentMedia.cover"
+            class="cover-img shadow-3"
+            ratio="1"
+            :style="mediaType === 'video' ? 'cursor: pointer' : ''"
+            @click="mediaType === 'video' ? toggleVideoPlay() : null"
+          >
+            <template v-if="mediaType === 'video' && !isVideoPlaying">
+              <div class="video-play-overlay flex flex-center">
+                <q-icon name="play_circle_filled" size="64px" color="white" />
+              </div>
+            </template>
+          </q-img>
           <div class="q-mt-sm">
             <q-rating
               v-model="rating"
               max="5"
               size="2em"
               color="yellow"
-              @update:model-value="rateTrack"
+              @update:model-value="rateMedia"
             />
           </div>
         </div>
 
         <!-- Contrôles et infos -->
-        <div class="track-info col-md-9 col-sm-12 q-pl-md">
-          <h2 class="track-title text-h5 text-weight-bold">
-            {{ currentAudio.title }}
+        <div class="media-info col-md-9 col-sm-12 q-pl-md">
+          <h2 class="media-title text-h5 text-weight-bold">
+            {{ currentMedia.title }}
             <q-btn
               round
               flat
@@ -38,9 +76,9 @@
               size="sm"
             />
           </h2>
-          <p class="track-author text-subtitle1 text-grey-8">
-            {{ currentAudio.artist }} • {{ currentAudio.genre }} •
-            {{ formatDate(currentAudio.date) }}
+          <p class="media-author text-subtitle1 text-grey-8">
+            {{ currentMedia.artist || currentMedia.author }} • {{ currentMedia.genre }} •
+            {{ formatDate(currentMedia.date) }}
           </p>
 
           <!-- Barre de progression améliorée -->
@@ -49,7 +87,7 @@
               v-model="progress"
               :min="0"
               :max="duration"
-              @change="seekAudio"
+              @change="mediaType === 'video' ? seekVideo() : seekAudio()"
               color="primary"
               label
               :label-value="`${formatTime(progress)} / ${formatTime(duration)}`"
@@ -65,17 +103,26 @@
               :color="isShuffle ? 'primary' : 'grey'"
               @click="toggleShuffle"
               size="md"
+              v-if="mediaType !== 'podcast'"
             />
-            <q-btn round flat icon="skip_previous" color="black" @click="prevTrack" size="lg" />
+            <q-btn round flat icon="skip_previous" color="black" @click="prevMedia" size="lg" />
             <q-btn
               round
               color="primary"
-              :icon="isPlaying ? 'pause' : 'play_arrow'"
-              @click="togglePlay"
+              :icon="
+                mediaType === 'video'
+                  ? isVideoPlaying
+                    ? 'pause'
+                    : 'play_arrow'
+                  : isPlaying
+                    ? 'pause'
+                    : 'play_arrow'
+              "
+              @click="mediaType === 'video' ? toggleVideoPlay() : togglePlay()"
               size="xl"
               class="q-mx-sm"
             />
-            <q-btn round flat icon="skip_next" color="black" @click="nextTrack" size="lg" />
+            <q-btn round flat icon="skip_next" color="black" @click="nextMedia" size="lg" />
             <q-btn
               round
               flat
@@ -107,8 +154,9 @@
               label="Vitesse"
               style="width: 120px"
               @update:model-value="changeSpeed"
+              v-if="mediaType !== 'video'"
             />
-            <q-btn flat icon="more_vert" round @click="showTrackMenu = true" />
+            <q-btn flat icon="more_vert" round @click="showMediaMenu = true" />
           </div>
         </div>
       </div>
@@ -116,7 +164,15 @@
       <!-- Liste de lecture -->
       <div class="playlist-section q-mt-xl">
         <div class="row justify-between items-center q-mb-md">
-          <h3 class="text-h6 q-my-none">Liste de lecture</h3>
+          <h3 class="text-h6 q-my-none">
+            {{
+              mediaType === 'audio'
+                ? 'Liste de lecture'
+                : mediaType === 'video'
+                  ? 'Vidéos'
+                  : 'Podcasts'
+            }}
+          </h3>
           <q-input
             filled
             rounded
@@ -133,22 +189,28 @@
 
         <q-table
           flat
-          :rows="filteredPlaylist"
-          :columns="playlistColumns"
+          :rows="filteredMediaList"
+          :columns="mediaColumns"
           row-key="id"
           hide-pagination
           :pagination="{ rowsPerPage: 0 }"
           :rows-per-page-options="[0]"
-          @row-click="(evt, row) => selectTrack(row.__index)"
+          @row-click="(evt, row) => selectMedia(row.__index)"
         >
           <template v-slot:body-cell-duration="props">
             <q-td :props="props">
               {{ formatTime(props.row.duration) }}
             </q-td>
           </template>
+          <template v-slot:body-cell-type="props">
+            <q-td :props="props">
+              <q-icon :name="getMediaTypeIcon(props.row)" size="sm" />
+              {{ props.row.type || 'audio' }}
+            </q-td>
+          </template>
           <template v-slot:body-cell-actions="props">
             <q-td :props="props">
-              <q-btn flat round icon="more_vert" size="sm" @click.stop="openTrackMenu(props.row)" />
+              <q-btn flat round icon="more_vert" size="sm" @click.stop="openMediaMenu(props.row)" />
             </q-td>
           </template>
         </q-table>
@@ -157,44 +219,69 @@
       <!-- Élément audio caché -->
       <audio
         ref="audioPlayer"
-        :src="currentAudio.src"
+        :src="currentMedia.src"
         @timeupdate="updateProgress"
         @ended="handleEnd"
         @loadedmetadata="updateDuration"
         @volumechange="updateVolume"
+        v-show="false"
       ></audio>
     </div>
 
-    <!-- Menu contextuel pour les pistes -->
-    <q-dialog v-model="showTrackMenu">
+    <!-- Menu contextuel pour les médias -->
+    <q-dialog v-model="showMediaMenu">
       <q-card style="width: 300px">
         <q-card-section>
-          <div class="text-h6">{{ selectedTrack?.title }}</div>
-          <div class="text-caption">{{ selectedTrack?.artist }}</div>
+          <div class="text-h6">{{ selectedMedia?.title }}</div>
+          <div class="text-caption">{{ selectedMedia?.artist || selectedMedia?.author }}</div>
         </q-card-section>
         <q-separator />
         <q-card-section class="q-pa-none">
           <q-list>
-            <q-item clickable v-ripple @click="addToPlaylist(selectedTrack)">
+            <q-item clickable v-ripple @click="addToPlaylist(selectedMedia)">
               <q-item-section avatar>
                 <q-icon name="playlist_add" />
               </q-item-section>
               <q-item-section>Ajouter à une playlist</q-item-section>
             </q-item>
-            <q-item clickable v-ripple @click="downloadTrack(selectedTrack)">
+            <q-item clickable v-ripple @click="downloadMedia(selectedMedia)">
               <q-item-section avatar>
                 <q-icon name="download" />
               </q-item-section>
               <q-item-section>Télécharger</q-item-section>
             </q-item>
-            <q-item clickable v-ripple @click="shareTrack(selectedTrack)">
+            <q-item clickable v-ripple @click="shareMedia(selectedMedia)">
               <q-item-section avatar>
                 <q-icon name="share" />
               </q-item-section>
               <q-item-section>Partager</q-item-section>
             </q-item>
+            <q-item clickable v-ripple @click="showMediaInfo(selectedMedia)">
+              <q-item-section avatar>
+                <q-icon name="info" />
+              </q-item-section>
+              <q-item-section>Informations</q-item-section>
+            </q-item>
           </q-list>
         </q-card-section>
+      </q-card>
+    </q-dialog>
+
+    <!-- Dialogue d'informations sur le média -->
+    <q-dialog v-model="showMediaInfoDialog">
+      <q-card style="width: 500px">
+        <q-card-section>
+          <div class="text-h6">{{ currentMediaInfo?.title }}</div>
+          <div class="text-subtitle2 q-mb-sm">
+            {{ currentMediaInfo?.artist || currentMediaInfo?.author }} •
+            {{ formatDate(currentMediaInfo?.date) }}
+          </div>
+          <q-img :src="currentMediaInfo?.cover" style="max-height: 200px" />
+          <p class="q-mt-md">{{ currentMediaInfo?.description }}</p>
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat label="Fermer" color="primary" v-close-popup />
+        </q-card-actions>
       </q-card>
     </q-dialog>
   </q-page>
@@ -202,17 +289,20 @@
 
 <script setup>
 import HeaderPage from 'src/components/HeaderPage.vue'
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useQuasar } from 'quasar'
 
 const $q = useQuasar()
 
 const audioPlayer = ref(null)
+const videoPlayer = ref(null)
 const visualizer = ref(null)
-const searchQuery = ref('') // Ajouté car manquant dans l'original
+const searchQuery = ref('')
+const mediaType = ref('audio') // 'audio', 'video', ou 'podcast'
 
 // États du lecteur
 const isPlaying = ref(false)
+const isVideoPlaying = ref(false)
 const progress = ref(0)
 const duration = ref(0)
 const volume = ref(0.7)
@@ -221,8 +311,10 @@ const isRepeat = ref(false)
 const isFavorite = ref(false)
 const rating = ref(3)
 const playbackRate = ref(1)
-const showTrackMenu = ref(false)
-const selectedTrack = ref(null)
+const showMediaMenu = ref(false)
+const selectedMedia = ref(null)
+const showMediaInfoDialog = ref(false)
+const currentMediaInfo = ref(null)
 
 // Options de vitesse
 const speedOptions = [
@@ -232,10 +324,12 @@ const speedOptions = [
   { label: '2.0x', value: 2 },
 ]
 
-// Liste de lecture
-const playlist = ref([
+// Liste de médias (audio, vidéo, podcasts)
+const mediaList = ref([
+  // Audios
   {
     id: 1,
+    type: 'audio',
     title: 'Les mystères de la forêt',
     artist: 'Marie Dubois',
     genre: 'Aventure',
@@ -247,6 +341,7 @@ const playlist = ref([
   },
   {
     id: 2,
+    type: 'audio',
     title: 'Le voyage interstellaire',
     artist: 'Jean Star',
     genre: 'Science-fiction',
@@ -256,26 +351,63 @@ const playlist = ref([
     date: '2023-06-22',
     description: 'Un périple à travers les étoiles et les galaxies lointaines',
   },
+  // Vidéos
   {
     id: 3,
-    title: "L'héritage du pharaon",
-    artist: 'Ali Moustafa',
-    genre: 'Historique',
-    src: '/audios/pharaon.mp3',
-    cover: '/img/covers/pharaon.jpg',
-    duration: 287,
-    date: '2023-04-10',
-    description: "La découverte d'un tombeau caché révèle des secrets millénaires",
+    type: 'video',
+    title: 'Tutoriel Vue.js avancé',
+    author: 'Tech Academy',
+    genre: 'Éducation',
+    src: '/videos/tutoriel-vue.mp4',
+    cover: '/img/covers/vue.jpg',
+    duration: 587,
+    date: '2023-07-10',
+    description: 'Un tutoriel complet sur les concepts avancés de Vue.js',
+  },
+  {
+    id: 4,
+    type: 'video',
+    title: 'Documentaire sur la nature',
+    author: 'National Geographic',
+    genre: 'Documentaire',
+    src: '/videos/nature.mp4',
+    cover: '/img/covers/nature.jpg',
+    duration: 1254,
+    date: '2023-08-05',
+    description: 'Un magnifique documentaire sur les merveilles de la nature',
+  },
+  // Podcasts
+  {
+    id: 5,
+    type: 'podcast',
+    title: 'Les dernières tendances tech',
+    author: 'Tech Talk',
+    genre: 'Technologie',
+    src: '/audios/podcast-tech.mp3',
+    cover: '/img/covers/podcast.jpg',
+    duration: 1860,
+    date: '2023-09-12',
+    description: 'Discussion sur les dernières tendances technologiques',
+    episode: 42,
+    season: 3,
   },
 ])
 
 const currentIndex = ref(0)
-const currentAudio = computed(() => playlist.value[currentIndex.value])
+const currentMedia = computed(() => filteredMediaList.value[currentIndex.value])
+const currentVideo = computed(() => (mediaType.value === 'video' ? currentMedia.value : null))
 
-// Colonnes de la table de playlist
-const playlistColumns = [
+// Colonnes de la table de médias
+const mediaColumns = [
+  { name: 'type', label: 'Type', field: 'type', align: 'left', sortable: true },
   { name: 'title', label: 'Titre', field: 'title', align: 'left', sortable: true },
-  { name: 'artist', label: 'Auteur', field: 'artist', align: 'left', sortable: true },
+  {
+    name: 'artist',
+    label: 'Auteur',
+    field: (row) => row.artist || row.author,
+    align: 'left',
+    sortable: true,
+  },
   { name: 'genre', label: 'Genre', field: 'genre', align: 'left', sortable: true },
   { name: 'duration', label: 'Durée', field: 'duration', align: 'right' },
   { name: 'actions', label: '', field: '', align: 'right' },
@@ -345,62 +477,111 @@ const togglePlay = async () => {
   isPlaying.value = !isPlaying.value
 }
 
-const prevTrack = () => {
-  currentIndex.value = (currentIndex.value - 1 + playlist.value.length) % playlist.value.length
-  loadTrack()
-}
-
-const nextTrack = () => {
-  if (isShuffle.value) {
-    currentIndex.value = Math.floor(Math.random() * playlist.value.length)
+// Fonctions du lecteur vidéo améliorées
+const toggleVideoPlay = async () => {
+  if (isVideoPlaying.value) {
+    videoPlayer.value.pause()
   } else {
-    currentIndex.value = (currentIndex.value + 1) % playlist.value.length
-  }
-  loadTrack()
-}
-
-const loadTrack = () => {
-  audioPlayer.value.load()
-  if (isPlaying.value) {
-    audioPlayer.value.play().then(() => {
-      if (audioContext.state === 'suspended') {
-        audioContext.resume()
+    try {
+      await videoPlayer.value.play()
+      // Pour les vidéos, nous activons le mode picture-in-picture si disponible
+      if (document.pictureInPictureEnabled && !videoPlayer.value.disablePictureInPicture) {
+        videoPlayer.value.requestPictureInPicture().catch((error) => {
+          console.log('Picture-in-Picture error:', error)
+        })
       }
-      drawVisualizer()
-    })
+    } catch (err) {
+      console.error('Erreur de lecture vidéo:', err)
+      $q.notify({
+        type: 'negative',
+        message: 'Erreur lors de la lecture vidéo',
+      })
+    }
+  }
+  isVideoPlaying.value = !isVideoPlaying.value
+}
+
+const nextMedia = () => {
+  if (filteredMediaList.value.length === 0) return
+
+  if (isShuffle.value && mediaType.value !== 'podcast') {
+    let newIndex
+    do {
+      newIndex = Math.floor(Math.random() * filteredMediaList.value.length)
+    } while (newIndex === currentIndex.value && filteredMediaList.value.length > 1)
+    currentIndex.value = newIndex
+  } else {
+    currentIndex.value = (currentIndex.value + 1) % filteredMediaList.value.length
+  }
+  loadMedia()
+}
+
+const prevMedia = () => {
+  if (filteredMediaList.value.length === 0) return
+
+  if (isShuffle.value && mediaType.value !== 'podcast') {
+    let newIndex
+    do {
+      newIndex = Math.floor(Math.random() * filteredMediaList.value.length)
+    } while (newIndex === currentIndex.value && filteredMediaList.value.length > 1)
+    currentIndex.value = newIndex
+  } else {
+    currentIndex.value =
+      (currentIndex.value - 1 + filteredMediaList.value.length) % filteredMediaList.value.length
+  }
+  loadMedia()
+}
+
+const loadMedia = () => {
+  if (filteredMediaList.value.length === 0) return
+
+  // Arrêter le média en cours
+  if (mediaType.value === 'video') {
+    isVideoPlaying.value = false
+    videoPlayer.value.pause()
+  } else {
+    isPlaying.value = false
+    audioPlayer.value.pause()
+    if (animationId) {
+      cancelAnimationFrame(animationId)
+    }
+  }
+
+  // Charger le nouveau média
+  if (mediaType.value === 'video') {
+    // Petite pause pour permettre au DOM de se mettre à jour
+    setTimeout(() => {
+      videoPlayer.value.load()
+      if (isVideoPlaying.value) {
+        videoPlayer.value.play().catch((err) => {
+          console.error('Erreur de lecture vidéo:', err)
+        })
+      }
+    }, 50)
+  } else {
+    audioPlayer.value.load()
+    if (isPlaying.value) {
+      audioPlayer.value
+        .play()
+        .then(() => {
+          if (audioContext && audioContext.state === 'suspended') {
+            audioContext.resume()
+          }
+          drawVisualizer()
+        })
+        .catch((err) => {
+          console.error('Erreur de lecture audio:', err)
+        })
+    }
   }
 }
 
-const seekAudio = () => {
-  audioPlayer.value.currentTime = progress.value
-}
-
-const setVolume = () => {
-  audioPlayer.value.volume = volume.value
-}
-
-const updateVolume = () => {
-  volume.value = audioPlayer.value.volume
-}
-
-const changeSpeed = () => {
-  audioPlayer.value.playbackRate = playbackRate.value
-}
-
-const updateProgress = () => {
-  progress.value = audioPlayer.value.currentTime
-}
-
-const updateDuration = () => {
-  duration.value = audioPlayer.value.duration
-}
-
-const handleEnd = () => {
+const handleVideoEnd = () => {
   if (isRepeat.value) {
-    audioPlayer.value.currentTime = 0
-    audioPlayer.value.play()
+    videoPlayer.value.currentTime = 0
+    videoPlayer.value.play()
   } else {
-    nextTrack()
+    nextMedia()
   }
 }
 
@@ -421,7 +602,7 @@ const toggleFavorite = () => {
   })
 }
 
-const rateTrack = () => {
+const rateMedia = () => {
   $q.notify({
     message: `Note ${rating.value} étoiles enregistrée`,
     icon: 'star',
@@ -429,14 +610,31 @@ const rateTrack = () => {
   })
 }
 
-const selectTrack = (index) => {
+const selectMedia = (index) => {
   currentIndex.value = index
-  loadTrack()
+  loadMedia()
 }
 
-const openTrackMenu = (track) => {
-  selectedTrack.value = track
-  showTrackMenu.value = true
+const openMediaMenu = (media) => {
+  selectedMedia.value = media
+  showMediaMenu.value = true
+}
+
+const showMediaInfo = (media) => {
+  currentMediaInfo.value = media
+  showMediaInfoDialog.value = true
+  showMediaMenu.value = false
+}
+
+const getMediaTypeIcon = (media) => {
+  switch (media.type) {
+    case 'video':
+      return 'videocam'
+    case 'podcast':
+      return 'podcasts'
+    default:
+      return 'audiotrack'
+  }
 }
 
 // Fonctions utilitaires
@@ -455,17 +653,51 @@ const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('fr-FR')
 }
 
-const filteredPlaylist = computed(() => {
-  return playlist.value.filter(
-    (track) =>
-      track.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      track.artist.toLowerCase().includes(searchQuery.value.toLowerCase()),
-  )
+const filteredMediaList = computed(() => {
+  return mediaList.value
+    .filter((media) => {
+      if (mediaType.value === 'audio') return media.type === 'audio'
+      if (mediaType.value === 'video') return media.type === 'video'
+      if (mediaType.value === 'podcast') return media.type === 'podcast'
+      return true
+    })
+    .filter((media) => {
+      const query = searchQuery.value.toLowerCase()
+      return (
+        media.title.toLowerCase().includes(query) ||
+        (media.artist && media.artist.toLowerCase().includes(query)) ||
+        (media.author && media.author.toLowerCase().includes(query))
+      )
+    })
+})
+
+// Réinitialiser l'état lors du changement de type de média
+watch(mediaType, (newType) => {
+  currentIndex.value = 0
+  isPlaying.value = false
+  isVideoPlaying.value = false
+  progress.value = 0
+  duration.value = 0
+
+  if (newType === 'video') {
+    // Pour les vidéos, nous utilisons les contrôles natifs mais gardons notre barre de progression
+    if (videoPlayer.value) {
+      videoPlayer.value.volume = volume.value
+    }
+  } else {
+    // Pour l'audio/podcast
+    if (audioPlayer.value) {
+      audioPlayer.value.volume = volume.value
+    }
+  }
 })
 
 // Initialisation
 onMounted(() => {
   audioPlayer.value.volume = volume.value
+  if (videoPlayer.value) {
+    videoPlayer.value.volume = volume.value
+  }
   if (visualizer.value) {
     const canvas = visualizer.value.querySelector('canvas')
     canvas.width = visualizer.value.offsetWidth
@@ -481,10 +713,23 @@ onMounted(() => {
   margin: 0 auto;
 }
 
-.audio-player-container {
+.media-player-container {
   border-radius: 16px;
   padding: 24px;
   margin: 16px;
+}
+
+.video-container {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #000;
+}
+
+.video-player {
+  width: 100%;
+  max-height: 500px;
+  display: block;
 }
 
 .audio-visualizer {
@@ -500,17 +745,28 @@ onMounted(() => {
   max-width: 250px;
   border-radius: 12px;
   transition: transform 0.3s ease;
+  position: relative;
 }
 
 .cover-img:hover {
   transform: scale(1.03);
 }
 
-.track-title {
+.video-play-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+}
+
+.media-title {
   margin-bottom: 4px;
 }
 
-.track-author {
+.media-author {
   margin-bottom: 16px;
 }
 
@@ -540,28 +796,6 @@ onMounted(() => {
   background-color: rgba(25, 118, 210, 0.08);
 }
 
-.hover-underline-animation {
-  position: relative;
-}
-
-.hover-underline-animation:after {
-  content: '';
-  position: absolute;
-  width: 100%;
-  transform: scaleX(0);
-  height: 2px;
-  bottom: 0;
-  left: 0;
-  background-color: currentColor;
-  transform-origin: bottom right;
-  transition: transform 0.25s ease-out;
-}
-
-.hover-underline-animation:hover:after {
-  transform: scaleX(1);
-  transform-origin: bottom left;
-}
-
 /* Transitions */
 .fade-enter-active,
 .fade-leave-active {
@@ -576,13 +810,43 @@ onMounted(() => {
   transform: translateX(10px);
 }
 
+.video-controls-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+  padding: 16px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.video-container:hover .video-controls-overlay {
+  opacity: 1;
+}
+
+.video-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Style pour le bouton plein écran */
+.fullscreen-btn {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  z-index: 10;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .player-section {
     flex-direction: column;
   }
 
-  .track-info {
+  .media-info {
     padding-left: 0;
     margin-top: 20px;
   }
@@ -594,6 +858,16 @@ onMounted(() => {
   .search-input {
     width: 100%;
     margin-top: 10px;
+  }
+
+  .video-player {
+    max-height: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .video-player {
+    max-height: 200px;
   }
 }
 </style>

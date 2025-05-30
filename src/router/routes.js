@@ -45,6 +45,17 @@ const routes = [
       },
 
       {
+        path: '/groupes',
+        component: () => import('src/communaute/CommuNaute.vue'),
+      },
+      {
+        path: '/group/:slug',
+        name: 'group-detail',
+        component: () => import('src/communaute/GroupDetail.vue'),
+        props: true,
+      },
+
+      {
         path: '/raconter',
         component: () => import('src/components/SaveStory.vue'),
       },
@@ -69,7 +80,11 @@ const routes = [
         path: '/connection',
         component: () => import('pages/LogginPage.vue'),
       },
-       {
+      {
+        path: '/communaute',
+        component: () => import('src/communaute/CommuNaute.vue'),
+      },
+      {
         path: '/footerUser',
         component: () => import('src/components/FooterPage.vue'),
       },

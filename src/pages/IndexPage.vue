@@ -1,26 +1,23 @@
 <template>
   <q-layout view="hHh lpR fFf">
-    
-    <link 
-    rel="stylesheet" 
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
 
     <Navbar />
     <q-separator spaced />
 
     <!-- HERO SECTION IMMERSIVE -->
     <section class="hero-section">
-      <q-parallax :height="10" :speed="0.5" class="hero-parallax"> 
-        <template v-slot:media><br><br>
-          <q-img
-            src="/img/hero-about.jpg"
-            class="hero-image "
-          
-          />
+      <q-parallax :height="10" :speed="0.5" class="hero-parallax">
+        <template v-slot:media
+          ><br /><br />
+          <q-img src="/img/hero-about.jpg" class="hero-image" />
         </template>
 
-        <div class="hero-content text-center"><br><br>
+        <div class="hero-content text-center">
+          <br /><br />
           <h1 class="hero-title animate__animated animate__fadeInDown text-white">
             Fumbo - L'Âme des Histoires Africaines
           </h1>
@@ -141,7 +138,7 @@
                   label="Écouter"
                   icon-right="arrow_forward"
                   class="q-mt-sm"
-                  to="/"
+                  to="/ecouter"
                 />
               </q-card-section>
             </q-card>
