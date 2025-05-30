@@ -16,7 +16,7 @@ export const useNationalitesStore = defineStore('nationalites', {
 
       try {
         const response = await axios.get(
-          'http://localhost/Api_Bibliotheque/nationalite/select/?user=herva&mdp=mdp'
+          'http://localhost:81/Api_Bibliotheque/nationalite/select/?user=herva&mdp=mdp'
         );
 
         console.log("Structure complète de la réponse:", response.data);
@@ -26,7 +26,7 @@ export const useNationalitesStore = defineStore('nationalites', {
         if (Array.isArray(nationalites)) {
           this.nationalites = nationalites.map(nationalite => ({
             ...nationalite,
-            image: `http://localhost/Api_Bibliotheque/${nationalite.image}`
+            image: `http://localhost:81/Api_Bibliotheque/${nationalite.image}`
           }));
         } else {
           console.error("La réponse n'est pas un tableau valide.");

@@ -11,7 +11,7 @@ export const useCategorieStore = defineStore('categorie', () => {
     loading.value = true
     error.value = null
     try {
-      const response = await axios.get('http://localhost/Api_bibliotheque/categorie/select_all/?user=herva&mdp=mdp')
+      const response = await axios.get('http://localhost:81/Api_bibliotheque/categorie/select_all/?user=herva&mdp=mdp')
       categories.value = response.data
     } catch (err) {
       error.value = err
