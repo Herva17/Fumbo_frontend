@@ -11,31 +11,45 @@
         <div class="nav-links-cairn">
           <q-btn
             flat
-            label="Accueil"
-            icon="home"
+            label="Librairie"
+            icon="local_library"
             class="nav-btn-cairn"
-            to="/"
+            to="/ecrire"
           />
           <q-btn
             flat
-            label="Ouvrages"
+            label="Livres gratuits"
             icon="menu_book"
             class="nav-btn-cairn"
-            to="/connection"
+            to="/ouvrage"
           />
           <q-btn
             flat
             label="Publier"
             icon="publish"
             class="nav-btn-cairn"
-            to="/connection"
+            to="/create-book"
           />
           <q-btn
             flat
             label="Ecrire"
             icon="edit"
             class="nav-btn-cairn"
-            to="/connection"
+            to="/write"
+          />
+          <q-btn
+            flat
+            label="Raconter"
+            icon="record_voice_over"
+            class="nav-btn-cairn"
+            to="/raconter"
+          />
+          <q-btn
+            flat
+            label="Ecouter"
+            icon="hearing"
+            class="nav-btn-cairn"
+            to="/ecouter"
           />
         </div>
         <q-separator spaced />

@@ -160,7 +160,7 @@ const nationalitesStore = useNationalitesStore()
 const router = useRouter()
 
 // Chemin de base pour les fichiers/images (adapte si besoin)
-const BASE_URL = 'http://localhost/'
+const BASE_URL = 'http://localhost:81/'
 
 // Fonction utilitaire pour corriger les chemins relatifs
 function getFullUrl(path) {

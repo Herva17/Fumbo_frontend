@@ -11,7 +11,7 @@ export const useAfficherHistoireStore = defineStore('afficherHistoire', () => {
     loading.value = true
     error.value = null
     try {
-      const res = await axios.get('http://localhost/Api_bibliotheque/histoire/details/?user=herva&mdp=mdp')
+      const res = await axios.get('http://localhost:81/Api_bibliotheque/histoire/details/?user=herva&mdp=mdp')
       console.log('Réponse API histoires:', res.data)
       // Correction : copie le tableau pour la réactivité
       const arr = res.data?.me?.Histoires

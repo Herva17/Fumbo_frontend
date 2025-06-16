@@ -3,7 +3,11 @@ const routes = [
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      { path: '', component: () => import('src/pages/IndexPage.vue') },
+      { path: '', component: () => import('src/pages/HomePage.vue') },
+        {
+        path: '/Home',
+        component: () => import('src/pages/IndexPage.vue'),
+      },
       {
         path: '/inscription',
         component: () => import('src/components/RegisterCount.vue'),
@@ -80,6 +84,7 @@ const routes = [
         path: '/connection',
         component: () => import('pages/LogginPage.vue'),
       },
+<<<<<<< HEAD
       {
         path: '/communaute',
         component: () => import('src/communaute/CommuNaute.vue'),
@@ -88,6 +93,9 @@ const routes = [
         path: '/footerUser',
         component: () => import('src/components/FooterPage.vue'),
       },
+=======
+      
+>>>>>>> 65c46fb (commit suite)
       {
         path: '/write',
         component: () => import('pages/EcrirePage.vue'),
@@ -98,7 +106,7 @@ const routes = [
       },
       {
         path: '/about',
-        component: () => import('src/pages/AboutPage.vue'),
+        component: () => import('src/pages/AbouttPage.vue'),
       },
       {
         path: '/Po',
@@ -108,10 +116,7 @@ const routes = [
         path: '/Ml',
         component: () => import('pages/MentionsL.vue'),
       },
-      {
-        path: '/Perso',
-        component: () => import('pages/TeamGroup.vue'),
-      },
+
       {
         path: '/Cont',
         component: () => import('pages/ContactSection.vue'),
@@ -119,6 +124,38 @@ const routes = [
       {
         path: '/Rec',
         component: () => import('pages/ConseilsView.vue'),
+      },
+      {
+        path: '/collections',
+        component: () => import('pages/CollectionsPage.vue'),
+      },
+      {
+        path: '/collection',
+        component: () => import('pages/CollectionsPage2.vue'),
+      },
+      {
+        path: '/articles',
+        component: () => import('pages/ArticlesPage.vue'),
+      },
+      {
+        path: '/journals',
+        component: () => import('pages/JournalsPage.vue'),
+      },
+      {
+        path: '/auteurs',
+        component: () => import('pages/AuteurPage.vue'),
+      },
+      {
+        path: '/actualites',
+        component: () => import('pages/ActualitePage.vue'),
+      },
+      {
+        path: '/instituts',
+        component: () => import('pages/InstitutionPage.vue'),
+      },
+      {
+        path: '/editeurs',
+        component: () => import('pages/EditeurPage.vue'),
       },
     ],
   },

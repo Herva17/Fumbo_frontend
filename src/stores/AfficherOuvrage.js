@@ -11,7 +11,7 @@ export const useAfficherOuvrageStore = defineStore('afficherOuvrage', () => {
     loading.value = true
     error.value = null
     try {
-      const res = await axios.get('http://localhost/Api_bibliotheque/ouvrage/afficher_livres/?user=herva&mdp=mdp')
+      const res = await axios.get('http://localhost:81/Api_bibliotheque/ouvrage/afficher_livres/?user=herva&mdp=mdp')
       // Correction ici : va chercher dans response.Livres
       ouvrages.value = res.data?.response?.Livres || []
     } catch (err) {

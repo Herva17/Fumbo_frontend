@@ -13,7 +13,7 @@ export const useEnregistreOuvrageStore = defineStore('enregistreOuvrage', () => 
     response.value = null
     try {
       const res = await axios.post(
-        'http://localhost/Api_bibliotheque/ouvrage/enregistrer/?user=herva&mdp=mdp',
+        'http://localhost:81/Api_bibliotheque/ouvrage/enregistrer/?user=herva&mdp=mdp',
         data
       )
       response.value = res.data

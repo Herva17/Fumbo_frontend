@@ -41,7 +41,7 @@ export const useLoginStore = defineStore('login', {
 
         // Envoyer la requête avec FormData
         const response = await axios.post(
-          'http://localhost:81/Api_Bibliotheque/user/login/?user=herva&mdp=mdp',
+          'http://localhost:81/Api_bibliotheque/user/login/?user=herva&mdp=mdp',
           formData, // Envoyer le FormData
           {
             headers: {

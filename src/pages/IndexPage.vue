@@ -1,4 +1,5 @@
 <template>
+<<<<<<< HEAD
   <q-layout view="hHh lpR fFf">
     <link
       rel="stylesheet"
@@ -7,6 +8,17 @@
 
     <Navbar />
     <q-separator spaced />
+=======
+  <!-- <q-layout view="hHh lpR fFf">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    /> -->
+ <div class="cairn-style">
+    <app-header2 />
+    
+    <q-page class="home-page">
+>>>>>>> 65c46fb (commit suite)
 
     <!-- HERO SECTION IMMERSIVE -->
     <section class="hero-section">
@@ -292,21 +304,37 @@
         </div>
       </div>
     </section>
-
-    <InfoSection />
-  </q-layout>
+   
+    </q-page>
+     <app-footer2/>
+  </div>
+  <!-- </q-layout> -->
 </template>
 
 <script setup>
 import { ref } from 'vue'
-import Navbar from 'src/components/MainNavbar.vue'
+import AppHeader2 from '../components/AppHeader2.vue'
+import AppFooter2 from '../components/AppFooter2.vue'
 
-import InfoSection from 'src/components/InfoSection.vue'
+
 // Gestion du carousel
 const currentSlide = ref(1)
 </script>
 
 <style scoped>
+.cairn-style {
+  font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  color: #333;
+}
+.home-background {
+  min-height: 100vh;
+  background: rgb(185, 208, 239); /* ou le même background que HomePage.vue */
+}
+.home-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
 /* HERO SECTION */
 .hero-section {
   position: relative;
@@ -499,68 +527,7 @@ const currentSlide = ref(1)
   font-size: 1.3rem;
   opacity: 0.9;
 }
-/* footer */
-.info-section {
-  display: flex;
-  justify-content: space-around;
-  background: #1a1a1a;
-  color: #fff;
-  padding: 40px 20px;
-  border-radius: 10px;
-  margin-top: 50px;
-}
-.section-title {
-  font-size: 1.2rem;
-  margin-bottom: 15px;
-  text-transform: uppercase;
-  font-weight: bold;
-}
-.highlight {
-  color: #ffcc00;
-}
-ul {
-  list-style: none;
-  padding: 0;
-}
-ul li {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-  font-size: 0.9rem;
-}
-.icon {
-  margin-right: 8px;
-  color: #ffcc00;
-}
-.contact .address {
-  font-size: 0.9rem;
-  margin-bottom: 15px;
-}
-.social-icons {
-  display: flex;
-  gap: 10px;
-}
-.social-btn {
-  font-size: 1.2rem;
-  background: transparent;
-  color: #fff;
-  transition: 0.3s;
-}
-.social-btn:hover {
-  transform: scale(1.2);
-}
-.facebook:hover {
-  color: #3b5998;
-}
-.instagram:hover {
-  color: #e4405f;
-}
-.youtube:hover {
-  color: #ff0000;
-}
-.linkedin:hover {
-  color: #0077b5;
-}
+
 
 /* RESPONSIVE */
 @media (max-width: 992px) {
@@ -619,6 +586,33 @@ ul li {
 
   .testimonial-carousel {
     height: 400px;
+  }
+}
+@media (max-width: 1023px) {
+  .home-page {
+    padding: 15px;
+  }
+
+  .section-title {
+    font-size: 1.3rem !important;
+  }
+}
+
+@media (max-width: 599px) {
+  .home-page {
+    padding: 10px;
+  }
+
+  .article-item {
+    padding: 12px !important;
+
+    .article-title {
+      font-size: 1rem !important;
+    }
+  }
+
+  .view-btn {
+    display: none !important;
   }
 }
 </style>

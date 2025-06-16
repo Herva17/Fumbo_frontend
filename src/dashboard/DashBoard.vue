@@ -22,10 +22,10 @@
     <div class="stories-list">
       <!-- Ouvrages dynamiques -->
       <template v-if="sort === 'ouvrage'">
-        <q-card
+        <q-card 
           v-for="ouvrage in filteredOuvrages"
           :key="ouvrage.id_ouvrage"
-          class="story-card q-mb-lg"
+          class="story-card q-mb-lg shadow-2" style="border-radius: 12px;"
           @mouseenter="loadAbonnes(ouvrage)"
         >
           <q-card-section horizontal>
@@ -291,7 +291,7 @@
       </q-card>
     </q-dialog>
 
-    <FooterPage />
+    <app-footer2/>
 
     <!-- Notification pour nouvelle histoire -->
     <q-notification
@@ -309,7 +309,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useQuasar } from 'quasar'
 import BannerSection from 'src/components/BannerSection.vue'
 import HeaderPage from 'src/components/HeaderPage.vue'
-import FooterPage from 'src/components/FooterPage.vue'
+import AppFooter2 from '../components/AppFooter2.vue'
 import { useCategorieStore } from 'src/stores/categorie'
 import { useAfficherOuvrageStore } from 'src/stores/AfficherOuvrage'
 import { useAfficherHistoireStore } from 'src/stores/AfficherHistoire'
@@ -477,7 +477,7 @@ function notifyNewHistoire(histoire) {
   showNotif.value = true
 }
 
-const BASE_URL = 'http://localhost/'
+const BASE_URL = 'http://localhost:81/'
 
 function getFullUrl(path) {
   if (!path) return '/img/default-book.jpg'
@@ -586,21 +586,109 @@ function onShare(item) {
 </script>
 
 <style scoped>
+/* --- Style Cairn Ouvrages Inspired --- */
+.dashboard-page {
+  background: #f5f6fa !important;
+  min-height: 100vh;
+  padding: 0 !important;
+}
+
+.banner {
+  margin-bottom: 0 !important;
+}
+
+.stories-list {
+  margin-top: 32px;
+  margin-bottom: 32px;
+}
+
+.story-card {
+  background: #fff !important;
+  border-radius: 10px !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+  border: 1px solid #e5e7eb !important;
+  transition: box-shadow 0.2s;
+  padding: 0 !important;
+}
+.story-card:hover {
+  box-shadow: 0 6px 24px rgba(50, 115, 220, 0.10) !important;
+  border-color: #b3c6e6 !important;
+}
+
+.q-card-section {
+  padding: 24px 32px !important;
+}
+
 .ouvrage-title {
-  color: #1976d2;
-  font-weight: bold;
-  letter-spacing: 0.5px;
-  font-size: 1.35rem;
-  text-shadow: 0 2px 8px rgba(25, 118, 210, 0.08);
-  transition: color 0.2s;
+  color: #2d3a4a !important;
+  font-weight: 700 !important;
+  font-size: 1.25rem !important;
+  letter-spacing: 0.01em;
+  margin-bottom: 4px;
+  text-shadow: none !important;
 }
-.ouvrage-title:hover {
-  color: #0d47a1;
+
+.text-subtitle2,
+.text-caption {
+  color: #6b7280 !important;
 }
+
+.q-chip,
+.q-badge {
+  border-radius: 12px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  background: #f5f6fa !important;
+  color: #2d3a4a !important;
+  margin-right: 4px;
+}
+
+.q-chip[color="primary"],
+.q-badge[color="primary"] {
+  background: #3273dc !important;
+  color: #fff !important;
+}
+
+.q-btn,
+.q-btn-toggle .q-btn {
+  border-radius: 20px !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  min-width: 110px;
+  box-shadow: none !important;
+  background: #f5f6fa !important;
+  color: #2d3a4a !important;
+  border: 1px solid #e5e7eb !important;
+  transition: background 0.2s;
+}
+.q-btn[color="primary"],
+.q-btn-toggle .q-btn[color="primary"] {
+  background: #3273dc !important;
+  color: #fff !important;
+  border: none !important;
+}
+.q-btn:hover,
+.q-btn-toggle .q-btn:hover {
+  background: #e5e7eb !important;
+}
+
+.q-btn[flat][color="primary"]:hover {
+  background: #255bb5 !important;
+  color: #fff !important;
+}
+
+.q-avatar {
+  border-radius: 50% !important;
+  border: 2px solid #e5e7eb !important;
+  background: #f5f6fa !important;
+}
+
 .story-description {
-  font-size: 1rem;
-  color: #444;
+  font-size: 1.05rem !important;
+  color: #444 !important;
+  margin-bottom: 8px;
 }
+<<<<<<< HEAD
 .story-card {
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -684,4 +772,60 @@ function onShare(item) {
   margin-bottom: 20px;
 }
 
+=======
+
+.q-banner {
+  background: #f5f6fa !important;
+  color: #2d3a4a !important;
+  border-radius: 8px !important;
+  border: 1px solid #e5e7eb !important;
+}
+
+.q-dialog .q-card {
+  border-radius: 12px !important;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08) !important;
+  border: 1px solid #e5e7eb !important;
+}
+
+.q-dialog .q-card-section .text-h6 {
+  color: #2d3a4a !important;
+  font-weight: 600 !important;
+}
+
+.q-dialog .q-btn {
+  border-radius: 20px !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
+}
+
+.q-select,
+.q-select__control,
+.q-field__control {
+  border-radius: 8px !important;
+  background: #f5f6fa !important;
+  border: 1px solid #e5e7eb !important;
+  box-shadow: none !important;
+}
+
+.q-select__label,
+.q-field__label {
+  color: #2d3a4a !important;
+  font-weight: 500 !important;
+  font-size: 15px !important;
+}
+
+.q-separator {
+  border-color: #e5e7eb !important;
+}
+
+@media (max-width: 992px) {
+  .q-card-section {
+    padding: 16px 8px !important;
+  }
+  .stories-list {
+    margin-top: 12px;
+    margin-bottom: 12px;
+  }
+}
+>>>>>>> 65c46fb (commit suite)
 </style>

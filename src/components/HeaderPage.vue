@@ -1,7 +1,8 @@
 <template>
-  <q-header elevated class="bg-white text-black shadow-sm" style="height: 80px">
-    <q-toolbar class="q-px-lg header-toolbar">
+ <q-header elevated class="app-header">
+    <q-toolbar class="header-toolbar">
       <!-- Logo -->
+<<<<<<< HEAD
       <q-avatar size="50px" class="logo-avatar">
         <img src="/img/fumbo_logo.png" style="background: none" />
       </q-avatar>
@@ -36,6 +37,21 @@
         <!-- Partie droite - Actions utilisateur -->
         <div class="col-auto row items-center q-gutter-sm right-actions" style="margin-top: 10px">
           <LangSwitcher class="q-ml-md" />
+=======
+      <q-btn flat to="/" class="logo-btn flex items-center no-padding">
+        <q-avatar size="90px" class="logo-avatar">
+          <img src="/img/fumbo_logo.png" alt="H-FUMBO logo" />
+        </q-avatar>
+        <div class="logo-text-container q-ml-sm">
+          <div class="logo-title text-blue-grey-10">H_FUMBO</div>
+          <div class="logo-subtitle">Plateforme scientifique africaine</div>
+        </div>
+      </q-btn>
+      <q-space />
+
+        <!-- Partie droite - Actions utilisateur -->
+        <div class="col-auto row items-center q-gutter-sm right-actions">
+>>>>>>> 65c46fb (commit suite)
           <q-space />
 
           <!-- Bouton Notifications -->
@@ -87,7 +103,13 @@
                               />
                             </div>
                           </div>
+<<<<<<< HEAD
                           <q-avatar size="48px" square> </q-avatar>
+=======
+                          <q-avatar size="48px" square>
+
+                          </q-avatar>
+>>>>>>> 65c46fb (commit suite)
                         </div>
                         <div class="col-12 q-ml-lg">
                           <div class="text-caption q-mb-xs">
@@ -261,7 +283,7 @@
             </q-menu>
           </q-btn>
         </div>
-      </div>
+      
     </q-toolbar>
 
     <!-- Drawer pour mobile -->
@@ -273,7 +295,7 @@
       :width="220"
       breakpoint="600"
     >
-      <q-list>
+      <!-- <q-list>
         <q-item clickable to="/ecrire"><q-item-section>Librairie</q-item-section></q-item>
         <q-item clickable to="/ouvrage"><q-item-section>Livres gratuit</q-item-section></q-item>
         <q-item clickable to="/write"><q-item-section>Écrire</q-item-section></q-item>
@@ -303,16 +325,18 @@
           </q-item-section>
           <q-item-section class="text-negative">Déconnexion</q-item-section>
         </q-item>
-      </q-list>
+      </q-list> -->
     </q-drawer>
   </q-header>
+  <NavBarPage/>
 </template>
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import LangSwitcher from 'src/components/LangSwitcher.vue'
+// import LangSwitcher from 'src/components/LangSwitcher.vue'
 import { useAfficherOuvrageStore } from 'src/stores/AfficherOuvrage'
 import { useAfficherHistoireStore } from 'src/stores/AfficherHistoire'
+import NavBarPage from 'src/components/NavBarPage.vue'
 
 const ouvrageStore = useAfficherOuvrageStore()
 const histoireStore = useAfficherHistoireStore()
@@ -357,7 +381,6 @@ const recentHistoires = computed(() =>
 const NOTIF_KEY = 'fumbo_read_notifs'
 const NOTIF_HISTOIRE_KEY = 'fumbo_read_histoires'
 const notifTab = ref('story')
-const searchQuery = ref('')
 const drawer = ref(false)
 const user = ref({
   id: '',
@@ -439,7 +462,7 @@ window.addEventListener('storage', () => {
 })
 
 // Adapter ici selon l'emplacement réel de tes images utilisateurs
-const BASE_URL = 'http://localhost/' // Mets l'URL de base de ton serveur
+const BASE_URL = 'http://localhost:81/' // Mets l'URL de base de ton serveur
 
 function getUserImage(path) {
   if (!path) return '/img/user-avatar.png'
@@ -461,3 +484,62 @@ const logout = () => {
   window.location.reload()
 }
 </script>
+<<<<<<< HEAD
+=======
+<style scoped>
+.app-header {
+  background: linear-gradient(135deg, #1976d2 0%, #0d47a1 100%);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+}
+
+.header-toolbar {
+  padding: 12px 32px;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+}
+
+.logo-btn {
+  text-align: left;
+  transition: opacity 0.3s ease;
+  &:hover {
+    opacity: 0.92;
+  }
+}
+
+.logo-avatar {
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease;
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
+.logo-text-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.logo-title {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: gray;
+  letter-spacing: 0.5px;
+}
+
+.logo-subtitle {
+  font-size: 0.85rem;
+  color: #d0e8ff;
+  font-weight: 400;
+}
+
+
+.spacer {
+  flex-grow: 1;
+}
+
+</style>
+>>>>>>> 65c46fb (commit suite)

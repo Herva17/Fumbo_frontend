@@ -50,8 +50,7 @@
         <section class="mb-8">
           <h2>
             <q-icon
-              name="fas fa-
-            server"
+              name="fas fa-server"
               class="mr-2"
             />
             Hébergement

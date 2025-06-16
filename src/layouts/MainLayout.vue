@@ -1,12 +1,26 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
-    <!-- Contenu des pages -->
+  <q-layout view="lHh Lpr ">
+    <!-- <app-header /> -->
+
     <q-page-container>
       <router-view />
     </q-page-container>
+
+    <!-- <app-footer /> -->
   </q-layout>
 </template>
 
-<script setup></script>
+<script>
+// import AppHeader from '../components/AppHeader.vue'
+// import AppFooter from '../components/AppFooter.vue'
+
+// export default {
+//   name: 'MainLayout',
+//   components: {
+//     AppHeader,
+//     AppFooter
+//   }
+// }
+</script>
 
 <style lang="scss" scoped></style>
