@@ -1,14 +1,4 @@
 <template>
-<<<<<<< HEAD
-  <q-layout view="hHh lpR fFf">
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-    />
-
-    <Navbar />
-    <q-separator spaced />
-=======
   <!-- <q-layout view="hHh lpR fFf">
     <link
       rel="stylesheet"
@@ -16,9 +6,9 @@
     /> -->
  <div class="cairn-style">
     <app-header2 />
-    
+
     <q-page class="home-page">
->>>>>>> 65c46fb (commit suite)
+
 
     <!-- HERO SECTION IMMERSIVE -->
     <section class="hero-section">
@@ -304,7 +294,7 @@
         </div>
       </div>
     </section>
-   
+
     </q-page>
      <app-footer2/>
   </div>
